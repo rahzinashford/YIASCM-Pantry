@@ -42,14 +42,14 @@ def init_database():
         # Check if we need to add sample products
         if Product.query.count() == 0:
             sample_products = [
-                {'name': 'Rice', 'price': 5, 'unit': 'grams'},
-                {'name': 'Apple', 'price': 15, 'unit': 'pieces'},
-                {'name': 'Sugar', 'price': 3, 'unit': 'grams'},
-                {'name': 'Chocolate Bar', 'price': 50, 'unit': 'pieces'},
-                {'name': 'Flour', 'price': 4, 'unit': 'grams'},
-                {'name': 'Orange', 'price': 12, 'unit': 'pieces'},
-                {'name': 'Salt', 'price': 2, 'unit': 'grams'},
-                {'name': 'Banana', 'price': 8, 'unit': 'pieces'}
+                {'name': 'Rice', 'price': 5, 'unit_type': 'grams'},
+                {'name': 'Apple', 'price': 15, 'unit_type': 'pieces'},
+                {'name': 'Sugar', 'price': 3, 'unit_type': 'grams'},
+                {'name': 'Chocolate Bar', 'price': 50, 'unit_type': 'pieces'},
+                {'name': 'Flour', 'price': 4, 'unit_type': 'grams'},
+                {'name': 'Orange', 'price': 12, 'unit_type': 'pieces'},
+                {'name': 'Salt', 'price': 2, 'unit_type': 'grams'},
+                {'name': 'Banana', 'price': 8, 'unit_type': 'pieces'}
             ]
             
             for product_data in sample_products:
