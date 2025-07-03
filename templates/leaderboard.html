@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - YIASCM Pantry{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="text-center mb-4">
+            <i class="fas fa-trophy me-2 text-warning"></i>Competition Leaderboard
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Round 1 Leaderboard -->
+    <div class="col-lg-6">
+        <div class="card border-warning">
+            <div class="card-header bg-warning">
+                <h4 class="mb-0">
+                    <i class="fas fa-coins me-2"></i>Round 1: Spend Less, Buy More
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if round1_leaderboard %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Team</th>
+                                <th>Total Quantity</th>
+                                <th>Price</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for submission in round1_leaderboard %}
+                            <tr {% if loop.index <= 3 %}class="table-success"{% endif %}>
+                                <td>
+                                    {% if loop.index == 1 %}
+                                        <i class="fas fa-medal text-warning"></i>
+                                    {% elif loop.index == 2 %}
+                                        <i class="fas fa-medal text-secondary"></i>
+                                    {% elif loop.index == 3 %}
+                                        <i class="fas fa-medal" style="color: #CD7F32;"></i>
+                                    {% else %}
+                                        {{ loop.index }}
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ submission.team_name }}</strong></td>
+                                <td>
+                                    <span class="badge bg-success">{{ submission.total_grams }}g</span>
+                                    <span class="badge bg-info">{{ submission.total_pieces }}pcs</span>
+                                </td>
+                                <td>₹{{ submission.total_price }}</td>
+                                <td><strong>{{ submission.score }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted">
+                    <i class="fas fa-inbox display-4 mb-3"></i>
+                    <p>No submissions yet for Round 1</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Round 2 Leaderboard -->
+    <div class="col-lg-6">
+        <div class="card border-primary">
+            <div class="card-header bg-primary">
+                <h4 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Round 2: Spend More, Buy Less
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if round2_leaderboard %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Team</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for submission in round2_leaderboard %}
+                            <tr {% if loop.index <= 3 %}class="table-success"{% endif %}>
+                                <td>
+                                    {% if loop.index == 1 %}
+                                        <i class="fas fa-medal text-warning"></i>
+                                    {% elif loop.index == 2 %}
+                                        <i class="fas fa-medal text-secondary"></i>
+                                    {% elif loop.index == 3 %}
+                                        <i class="fas fa-medal" style="color: #CD7F32;"></i>
+                                    {% else %}
+                                        {{ loop.index }}
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ submission.team_name }}</strong></td>
+                                <td>₹{{ submission.total_price }}</td>
+                                <td>
+                                    <span class="badge bg-success">{{ submission.total_grams }}g</span>
+                                    <span class="badge bg-info">{{ submission.total_pieces }}pcs</span>
+                                </td>
+                                <td><strong>{{ "%.2f"|format(submission.score) }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted">
+                    <i class="fas fa-inbox display-4 mb-3"></i>
+                    <p>No submissions yet for Round 2</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Scoring Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-warning">Round 1 Scoring:</h6>
+                        <p>Score = Total Grams + Total Pieces</p>
+                        <p class="text-muted">Higher total quantity = Better ranking</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Round 2 Scoring:</h6>
+                        <p>Score = Total Price ÷ Total Quantity</p>
+                        <p class="text-muted">Higher ratio = Better ranking</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not (round1_leaderboard or round2_leaderboard) %}
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <div class="alert alert-info">
+            <h5><i class="fas fa-rocket me-2"></i>Be the First!</h5>
+            <p class="mb-0">No teams have completed the rounds yet. Register your team and start playing to claim the top spot!</p>
+        </div>
+        <a href="{{ url_for('register') }}" class="btn btn-primary me-2">Register Team</a>
+        <a href="{{ url_for('login') }}" class="btn btn-outline-primary">Login</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

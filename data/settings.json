@@ -1,0 +1,6 @@
+{
+  "round1_budget": 200,
+  "admin_username": "admin",
+  "admin_password": "scrypt:32768:8:1$example"
+}
+

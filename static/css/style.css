@@ -1,0 +1,125 @@
+/* Custom styles for YIASCM Pantry */
+
+.hero-section {
+    padding: 2rem 0;
+}
+
+.sticky-top {
+    top: 1rem;
+}
+
+/* Team name tooltip styling */
+.team-name {
+    cursor: help;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 1rem 0;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .sticky-top {
+        position: static !important;
+    }
+}
+
+/* Custom badge colors */
+.badge {
+    font-size: 0.8em;
+}
+
+/* Progress bar styling */
+.progress {
+    height: 8px;
+}
+
+/* Card hover effects */
+.card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Table row hover for better UX */
+.table-hover tbody tr:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Medal colors for leaderboard */
+.fas.fa-medal {
+    font-size: 1.2em;
+}
+
+/* Alert styling */
+.alert {
+    border-left: 4px solid;
+}
+
+.alert-info {
+    border-left-color: var(--bs-info);
+}
+
+.alert-warning {
+    border-left-color: var(--bs-warning);
+}
+
+.alert-success {
+    border-left-color: var(--bs-success);
+}
+
+.alert-danger {
+    border-left-color: var(--bs-danger);
+}
+
+/* Form styling improvements */
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Navigation improvements */
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+/* Footer styling */
+footer {
+    margin-top: auto;
+}
+
+/* Utility classes */
+.text-bronze {
+    color: #CD7F32;
+}
+
+/* Loading states */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Custom scrollbar for better UX */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: var(--bs-gray-200);
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-400);
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-gray-500);
+}

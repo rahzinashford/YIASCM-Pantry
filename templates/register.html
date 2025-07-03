@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Register Team - YIASCM Pantry{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3><i class="fas fa-user-plus me-2"></i>Register Your Team</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="team_name" class="form-label">Team Name *</label>
+                        <input type="text" class="form-control" id="team_name" name="team_name" required 
+                               placeholder="Enter unique team name">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="institution" class="form-label">Institution Name *</label>
+                        <input type="text" class="form-control" id="institution" name="institution" required 
+                               placeholder="Enter your institution/organization name">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="members" class="form-label">Team Members *</label>
+                        <textarea class="form-control" id="members" name="members" rows="3" required 
+                                  placeholder="Enter names of all team members (comma separated)"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="password" name="password" required 
+                               minlength="6" placeholder="Enter team password (min 6 characters)">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required 
+                               minlength="6" placeholder="Confirm your password">
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>Register Team
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p class="mb-0">Already have a team? <a href="{{ url_for('login') }}">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="alert alert-info">
+            <h6><i class="fas fa-info-circle me-2"></i>Registration Guidelines:</h6>
+            <ul class="mb-0">
+                <li>Choose a unique team name that represents your group</li>
+                <li>All team members should be listed in the members field</li>
+                <li>Keep your password secure - you'll need it to access the game</li>
+                <li>After registration, you can immediately start playing both rounds</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

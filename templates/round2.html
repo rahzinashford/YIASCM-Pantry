@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Round 2 - YIASCM Pantry{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary">
+                <h3 class="mb-0"><i class="fas fa-chart-line me-2"></i>Round 2: Spend More, Buy Less</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-target me-2"></i>Objective:</h6>
+                    <p class="mb-2">Spend as much money as possible while purchasing the <strong>smallest quantity</strong> of goods. There is <strong>no budget constraint</strong> in this round.</p>
+                    <p class="mb-0"><strong>Scoring:</strong> Your score is Total Price ÷ Total Quantity. Higher ratio = Better ranking.</p>
+                </div>
+
+                {% if products %}
+                <form method="POST" id="round2Form">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-shopping-basket me-2"></i>Available Products</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Price</th>
+                                                    <th>Unit Description</th>
+                                                    <th>Quantity</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for product in products %}
+                                                <tr>
+                                                    <td><strong>{{ product.name }}</strong></td>
+                                                    <td>₹{{ "%.2f"|format(product.price) }}</td>
+                                                    <td>
+                                                        <span class="badge {% if product.unit_type == 'grams' %}bg-success{% else %}bg-info{% endif %}">
+                                                            {{ product.unit_display }}
+                                                        </span>
+                                                        <br><small class="text-muted">₹{{ "%.3f"|format(product.unit_price) }} per {{ product.unit_type[:-1] }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control quantity-input" 
+                                                               name="quantity_{{ product.id }}" 
+                                                               min="0" value="0" 
+                                                               data-price="{{ product.price }}"
+                                                               data-unit-type="{{ product.unit_type }}"
+                                                               data-unit-quantity="{{ product.quantity }}"
+                                                               data-unit-price="{{ product.unit_price }}">
+                                                    </td>
+                                                    <td class="item-total">₹0</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card border-success sticky-top">
+                                <div class="card-header bg-success">
+                                    <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Order Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-warning">
+                                        <small><i class="fas fa-lightbulb me-1"></i><strong>Strategy Tip:</strong> Focus on expensive items with small quantities to maximize your score ratio!</small>
+                                    </div>
+                                    
+                                    <table class="table table-sm">
+                                        <tr class="table-primary">
+                                            <td><strong>Total Price:</strong></td>
+                                            <td><strong id="totalPrice">₹0</strong></td>
+                                        </tr>
+                                        <tr class="table-success">
+                                            <td>Total Grams:</td>
+                                            <td><strong id="totalGrams">0</strong></td>
+                                        </tr>
+                                        <tr class="table-info">
+                                            <td>Total Pieces:</td>
+                                            <td><strong id="totalPieces">0</strong></td>
+                                        </tr>
+                                        <tr class="table-secondary">
+                                            <td>Total Quantity:</td>
+                                            <td><strong id="totalQuantity">0</strong></td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td><strong>Score (Price ÷ Quantity):</strong></td>
+                                            <td><strong id="scoreRatio">0.00</strong></td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                                            <i class="fas fa-check me-2"></i>Complete Round 2
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                {% else %}
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>No Products Available</h6>
+                    <p class="mb-0">There are currently no products available for purchase. Please contact the administrator.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    const form = document.getElementById('round2Form');
+    
+    function updateTotals() {
+        let totalPrice = 0;
+        let totalGrams = 0;
+        let totalPieces = 0;
+        
+        quantityInputs.forEach(input => {
+            const quantity = parseInt(input.value) || 0;
+            const price = parseFloat(input.dataset.price);
+            const unitType = input.dataset.unitType;
+            const unitQuantity = parseInt(input.dataset.unitQuantity);
+            const itemTotal = quantity * price;
+            
+            // Update individual item total
+            const row = input.closest('tr');
+            row.querySelector('.item-total').textContent = '₹' + itemTotal.toFixed(2);
+            
+            totalPrice += itemTotal;
+            
+            // Calculate actual grams/pieces based on unit quantity
+            if (unitType === 'grams') {
+                totalGrams += quantity * unitQuantity;
+            } else {
+                totalPieces += quantity * unitQuantity;
+            }
+        });
+        
+        const totalQuantity = totalGrams + totalPieces;
+        const scoreRatio = totalQuantity > 0 ? totalPrice / totalQuantity : 0;
+        
+        // Update summary
+        document.getElementById('totalPrice').textContent = '₹' + totalPrice.toFixed(2);
+        document.getElementById('totalGrams').textContent = totalGrams;
+        document.getElementById('totalPieces').textContent = totalPieces;
+        document.getElementById('totalQuantity').textContent = totalQuantity;
+        document.getElementById('scoreRatio').textContent = scoreRatio.toFixed(2);
+        
+        // Enable/disable submit button
+        const submitBtn = document.getElementById('submitBtn');
+        if (totalQuantity === 0) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-shopping-cart me-2"></i>Select Items';
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Complete Round 2';
+        }
+    }
+    
+    quantityInputs.forEach(input => {
+        input.addEventListener('input', updateTotals);
+    });
+    
+    updateTotals();
+});
+</script>
+{% endblock %}

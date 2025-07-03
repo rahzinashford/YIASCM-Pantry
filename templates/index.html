@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - YIASCM Pantry{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <div class="hero-section mb-5">
+            <h1 class="display-4 fw-bold text-primary mb-4">
+                <i class="fas fa-shopping-cart me-3"></i>
+                Welcome to YIASCM Pantry
+            </h1>
+            <p class="lead mb-4">
+                A competitive team-based purchasing game designed to simulate real-life decision-making under constraints.
+                Engage in strategic gameplay across two challenging rounds!
+            </p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card h-100 border-primary">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-primary mb-3">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <h4 class="card-title">Round 1</h4>
+                        <h6 class="text-muted mb-3">Spend Less, Buy More</h6>
+                        <p class="card-text">
+                            Maximize your total quantity of items while staying within the budget constraint.
+                            Strategic purchasing is key to success!
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-success">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-success mb-3">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4 class="card-title">Round 2</h4>
+                        <h6 class="text-muted mb-3">Spend More, Buy Less</h6>
+                        <p class="card-text">
+                            Maximize your spending while minimizing the quantity of items purchased.
+                            Think outside the box for optimal results!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if not session.team_name %}
+        <div class="cta-section">
+            <h3 class="mb-4">Ready to compete?</h3>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-md-2">
+                    <i class="fas fa-user-plus me-2"></i>Register Team
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Team Login
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="cta-section">
+            <h3 class="mb-4">Welcome back, {{ session.team_name }}!</h3>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="text-center">
+            <div class="display-6 text-info mb-3">
+                <i class="fas fa-users"></i>
+            </div>
+            <h5>Team-Based</h5>
+            <p class="text-muted">Collaborate with your team members to make strategic purchasing decisions.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="text-center">
+            <div class="display-6 text-warning mb-3">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h5>Competitive</h5>
+            <p class="text-muted">Compete against other teams and climb the leaderboard rankings.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="text-center">
+            <div class="display-6 text-success mb-3">
+                <i class="fas fa-brain"></i>
+            </div>
+            <h5>Strategic</h5>
+            <p class="text-muted">Develop optimal strategies for different constraint scenarios.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{
+  "TestTeam": {
+    "password_hash": "scrypt:32768:8:1$QvfZAmeAPJFPX5wB$258492322ea41f20d16d797f5b9b2108abb703dcb6ffae8953d646865266fe12caeb372f6cd5d43bae6c6d5a103fab47d9c8c5411f823d3c279ac51436fe7493",
+    "institution": "TestInstitution",
+    "members": "John Doe, Jane Smith",
+    "registered_at": "2025-07-02T15:31:16.969443",
+    "round1_completed": false,
+    "round2_completed": false
+  }
+}

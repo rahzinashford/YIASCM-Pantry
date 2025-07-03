@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Team Login - YIASCM Pantry{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3><i class="fas fa-sign-in-alt me-2"></i>Team Login</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="team_name" class="form-label">Team Name</label>
+                        <input type="text" class="form-control" id="team_name" name="team_name" required 
+                               placeholder="Enter your team name">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required 
+                               placeholder="Enter your team password">
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p class="mb-0">Don't have a team? <a href="{{ url_for('register') }}">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="alert alert-primary">
+            <h6><i class="fas fa-gamepad me-2"></i>Game Overview:</h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Round 1 - Spend Less, Buy More:</strong>
+                    <p class="mb-2">Purchase maximum quantity within budget constraints</p>
+                </div>
+                <div class="col-md-6">
+                    <strong>Round 2 - Spend More, Buy Less:</strong>
+                    <p class="mb-2">Maximize spending while minimizing quantity purchased</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

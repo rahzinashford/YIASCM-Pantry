@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - YIASCM Pantry{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-center">
+                <h3><i class="fas fa-shield-alt me-2"></i>Admin Access</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Admin Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required 
+                               placeholder="Enter admin username">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Admin Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required 
+                               placeholder="Enter admin password">
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-sign-in-alt me-2"></i>Admin Login
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('index') }}" class="text-muted">← Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="alert alert-warning">
+            <h6><i class="fas fa-exclamation-triangle me-2"></i>Admin Panel Access:</h6>
+            <ul class="mb-0">
+                <li>Manage products and pricing</li>
+                <li>View and manage team registrations</li>
+                <li>Monitor round submissions and results</li>
+                <li>Configure game settings and budget limits</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

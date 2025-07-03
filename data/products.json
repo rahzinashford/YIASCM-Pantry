@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "name": "Rice",
+    "price": 5,
+    "unit": "grams"
+  },
+  {
+    "id": 2,
+    "name": "Apple",
+    "price": 15,
+    "unit": "pieces"
+  },
+  {
+    "id": 3,
+    "name": "Sugar",
+    "price": 3,
+    "unit": "grams"
+  },
+  {
+    "id": 4,
+    "name": "Chocolate Bar",
+    "price": 50,
+    "unit": "pieces"
+  },
+  {
+    "id": 5,
+    "name": "Flour",
+    "price": 4,
+    "unit": "grams"
+  },
+  {
+    "id": 6,
+    "name": "Orange",
+    "price": 12,
+    "unit": "pieces"
+  },
+  {
+    "id": 7,
+    "name": "Salt",
+    "price": 2,
+    "unit": "grams"
+  },
+  {
+    "id": 8,
+    "name": "Banana",
+    "price": 8,
+    "unit": "pieces"
+  }
+]
+

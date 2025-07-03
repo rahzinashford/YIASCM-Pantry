@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - YIASCM Pantry{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-tachometer-alt me-2"></i>Team Dashboard</h2>
+            <span class="badge bg-primary fs-6">{{ team_name }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Team Information -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users me-2"></i>Team Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Team Name:</strong> {{ team_name }}</p>
+                <p><strong>Institution:</strong> {{ team_data.institution }}</p>
+                <p><strong>Members:</strong></p>
+                <small class="text-muted">{{ team_data.members }}</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Round 1 Status -->
+    <div class="col-lg-4">
+        <div class="card {% if team_data.round1_completed %}border-success{% else %}border-warning{% endif %}">
+            <div class="card-header {% if team_data.round1_completed %}bg-success{% else %}bg-warning{% endif %}">
+                <h5 class="mb-0">
+                    <i class="fas fa-coins me-2"></i>Round 1: Spend Less, Buy More
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if team_data.round1_completed %}
+                    <div class="text-center">
+                        <i class="fas fa-check-circle text-success display-4 mb-3"></i>
+                        <h6 class="text-success">Completed!</h6>
+                        <p class="text-muted">You have successfully completed Round 1.</p>
+                    </div>
+                {% else %}
+                    <p class="card-text">Maximize your quantity within the budget constraint.</p>
+                    <div class="d-grid">
+                        <a href="{{ url_for('round1') }}" class="btn btn-warning">
+                            <i class="fas fa-play me-2"></i>Start Round 1
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Round 2 Status -->
+    <div class="col-lg-4">
+        <div class="card {% if team_data.round2_completed %}border-success{% elif team_data.round1_completed %}border-primary{% else %}border-secondary{% endif %}">
+            <div class="card-header {% if team_data.round2_completed %}bg-success{% elif team_data.round1_completed %}bg-primary{% else %}bg-secondary{% endif %}">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Round 2: Spend More, Buy Less
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if team_data.round2_completed %}
+                    <div class="text-center">
+                        <i class="fas fa-check-circle text-success display-4 mb-3"></i>
+                        <h6 class="text-success">Completed!</h6>
+                        <p class="text-muted">You have successfully completed Round 2.</p>
+                    </div>
+                {% elif team_data.round1_completed %}
+                    <p class="card-text">Maximize spending while minimizing quantity.</p>
+                    <div class="d-grid">
+                        <a href="{{ url_for('round2') }}" class="btn btn-primary">
+                            <i class="fas fa-play me-2"></i>Start Round 2
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center">
+                        <i class="fas fa-lock text-muted display-4 mb-3"></i>
+                        <h6 class="text-muted">Locked</h6>
+                        <p class="text-muted">Complete Round 1 first to unlock Round 2.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Game Rules & Objectives</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-warning">Round 1: Spend Less, Buy More</h6>
+                        <ul>
+                            <li>Fixed budget constraint applies</li>
+                            <li>Goal: Purchase maximum total quantity (grams + pieces)</li>
+                            <li>Score = Total quantity purchased</li>
+                            <li>Higher quantity = Better ranking</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Round 2: Spend More, Buy Less</h6>
+                        <ul>
+                            <li>No budget constraints</li>
+                            <li>Goal: Maximize spending while minimizing quantity</li>
+                            <li>Score = Total Price ÷ Total Quantity</li>
+                            <li>Higher ratio = Better ranking</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('leaderboard') }}" class="btn btn-outline-primary">
+            <i class="fas fa-trophy me-2"></i>View Leaderboard
+        </a>
+    </div>
+</div>
+{% endblock %}

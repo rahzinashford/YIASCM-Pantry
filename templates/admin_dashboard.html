@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - YIASCM Pantry{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-cog me-2"></i>Admin Dashboard</h2>
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <h3 class="text-primary">{{ teams|length }}</h3>
+                <p class="mb-0">Registered Teams</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <h3 class="text-success">{{ products|length }}</h3>
+                <p class="mb-0">Available Products</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <h3 class="text-warning">{{ submissions.round1|length }}</h3>
+                <p class="mb-0">Round 1 Submissions</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <h3 class="text-info">{{ submissions.round2|length }}</h3>
+                <p class="mb-0">Round 2 Submissions</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Team Management -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users me-2"></i>Team Management</h5>
+            </div>
+            <div class="card-body">
+                {% if teams %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Team Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team_name, team_data in teams.items() %}
+                            <tr>
+                                <td>
+                                    <strong class="team-name" 
+                                            data-bs-toggle="tooltip" 
+                                            data-bs-html="true"
+                                            data-bs-title="<strong>Institution:</strong> {{ team_data.institution }}<br><strong>Members:</strong> {{ team_data.members }}<br><strong>Registered:</strong> {{ team_data.registered_at[:10] }}">
+                                        {{ team_name }}
+                                    </strong>
+                                </td>
+                                <td>
+                                    {% if team_data.round1_completed and team_data.round2_completed %}
+                                        <span class="badge bg-success">Both Completed</span>
+                                    {% elif team_data.round1_completed %}
+                                        <span class="badge bg-warning">Round 1 Done</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Not Started</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('delete_team', team_name=team_name) }}" 
+                                          style="display: inline-block;" 
+                                          onsubmit="return confirm('Are you sure you want to delete team {{ team_name }}? This action cannot be undone.')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted">
+                    <i class="fas fa-inbox display-4 mb-3"></i>
+                    <p>No teams registered yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Settings -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-sliders-h me-2"></i>Game Settings</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('update_budget') }}">
+                    <div class="mb-3">
+                        <label for="budget" class="form-label">Round 1 Budget (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" id="budget" name="budget" 
+                                   value="{{ settings.round1_budget }}" min="1" step="0.01" required>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="alert alert-info">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Current budget: <strong>₹{{ settings.round1_budget }}</strong><br>
+                        This affects all new Round 1 attempts.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Management -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-box me-2"></i>Product Management</h5>
+            </div>
+            <div class="card-body">
+                <!-- Add Product Form -->
+                <form method="POST" action="{{ url_for('add_product') }}" class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" name="name" placeholder="Product Name" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="price" placeholder="Price" 
+                               min="0.01" step="0.01" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="quantity" placeholder="Quantity" 
+                               min="1" value="1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="unit_type" required>
+                            <option value="">Select Unit Type</option>
+                            <option value="grams">Grams (per X grams)</option>
+                            <option value="pieces">Pieces (X pieces)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="alert alert-info mb-4">
+                    <h6><i class="fas fa-info-circle me-2"></i>How to Add Products:</h6>
+                    <ul class="mb-0 small">
+                        <li><strong>Grams:</strong> Enter quantity like 100, 50, 25 for "per 100 grams", "per 50 grams", etc.</li>
+                        <li><strong>Pieces:</strong> Enter quantity like 1, 4, 6 for "1 piece", "4 pieces", "6 pieces", etc.</li>
+                        <li><strong>Examples:</strong> Rice ₹5 per 100 grams, Chocolate ₹50 for 4 pieces</li>
+                    </ul>
+                </div>
+
+                <!-- Products List -->
+                {% if products %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Unit Description</th>
+                                <th>Unit Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td>{{ product.id }}</td>
+                                <td><strong>{{ product.name }}</strong></td>
+                                <td>₹{{ "%.2f"|format(product.price) }}</td>
+                                <td>
+                                    <span class="badge {% if product.unit_type == 'grams' %}bg-success{% else %}bg-info{% endif %}">
+                                        {{ product.unit_display }}
+                                    </span>
+                                </td>
+                                <td class="text-muted small">
+                                    ₹{{ "%.3f"|format(product.unit_price) }} per {{ product.unit_type[:-1] }}
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('delete_product', product_id=product.id) }}" 
+                                          style="display: inline-block;"
+                                          onsubmit="return confirm('Are you sure you want to delete {{ product.name }}?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted">
+                    <i class="fas fa-inbox display-4 mb-3"></i>
+                    <p>No products available. Add some products to get started!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Submissions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clipboard-list me-2"></i>Recent Submissions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h6 class="text-warning">Round 1 Submissions</h6>
+                        {% if submissions.round1 %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Team</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sub in submissions.round1[-5:] %}
+                                    <tr>
+                                        <td>{{ sub.team_name }}</td>
+                                        <td>₹{{ sub.total_price }}</td>
+                                        <td>{{ sub.total_grams + sub.total_pieces }}</td>
+                                        <td>{{ sub.score }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No submissions yet</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-lg-6">
+                        <h6 class="text-primary">Round 2 Submissions</h6>
+                        {% if submissions.round2 %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Team</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sub in submissions.round2[-5:] %}
+                                    <tr>
+                                        <td>{{ sub.team_name }}</td>
+                                        <td>₹{{ sub.total_price }}</td>
+                                        <td>{{ sub.total_grams + sub.total_pieces }}</td>
+                                        <td>{{ "%.2f"|format(sub.score) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No submissions yet</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}
