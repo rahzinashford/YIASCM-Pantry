@@ -190,7 +190,7 @@ def round1():
                     item_total = quantity * float(product.price)
                     total_price += item_total
                     
-                    if product.unit == 'grams':
+                    if product.unit_type == 'grams':
                         total_grams += quantity
                     else:  # pieces
                         total_pieces += quantity
@@ -199,7 +199,7 @@ def round1():
                         'product_id': product.id,
                         'name': product.name,
                         'price': float(product.price),
-                        'unit': product.unit,
+                        'unit_type': product.unit_type,
                         'quantity': quantity,
                         'total': item_total
                     })
@@ -278,7 +278,7 @@ def round2():
                     item_total = quantity * float(product.price)
                     total_price += item_total
                     
-                    if product.unit == 'grams':
+                    if product.unit_type == 'grams':
                         total_grams += quantity
                     else:  # pieces
                         total_pieces += quantity
@@ -287,7 +287,7 @@ def round2():
                         'product_id': product.id,
                         'name': product.name,
                         'price': float(product.price),
-                        'unit': product.unit,
+                        'unit_type': product.unit_type,
                         'quantity': quantity,
                         'total': item_total
                     })
