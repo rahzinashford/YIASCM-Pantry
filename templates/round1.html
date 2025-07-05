@@ -25,42 +25,100 @@
                                     <h5><i class="fas fa-shopping-basket me-2"></i>Available Products</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Product</th>
-                                                    <th>Price</th>
-                                                    <th>Unit Description</th>
-                                                    <th>Quantity</th>
-                                                    <th>Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for product in products %}
-                                                <tr>
-                                                    <td><strong>{{ product.name }}</strong></td>
-                                                    <td>₹{{ "%.2f"|format(product.price) }}</td>
-                                                    <td>
-                                                        <span class="badge {% if product.unit_type == 'grams' %}bg-success{% else %}bg-info{% endif %}">
-                                                            {{ product.unit_display }}
-                                                        </span>
-                                                        <br><small class="text-muted">₹{{ "%.3f"|format(product.unit_price) }} per {{ product.unit_type[:-1] }}</small>
-                                                    </td>
-                                                    <td>
-                                                        <input type="number" class="form-control quantity-input" 
-                                                               name="quantity_{{ product.id }}" 
-                                                               min="0" value="0" 
-                                                               data-price="{{ product.price }}"
-                                                               data-unit-type="{{ product.unit_type }}"
-                                                               data-unit-quantity="{{ product.quantity }}"
-                                                               data-unit-price="{{ product.unit_price }}">
-                                                    </td>
-                                                    <td class="item-total">₹0</td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
+                                    <!-- Desktop Table View -->
+                                    <div class="desktop-products-table">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Image</th>
+                                                        <th>Product</th>
+                                                        <th>Price</th>
+                                                        <th>Unit Description</th>
+                                                        <th>Quantity</th>
+                                                        <th>Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for product in products %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if product.image_url %}
+                                                                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
+                                                            {% else %}
+                                                                <div class="product-image-placeholder">
+                                                                    <i class="fas fa-image text-muted"></i>
+                                                                </div>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td><strong>{{ product.name }}</strong></td>
+                                                        <td>₹{{ "%.2f"|format(product.price) }}</td>
+                                                        <td>
+                                                            <span class="badge {% if product.unit_type == 'grams' %}bg-success{% else %}bg-info{% endif %}">
+                                                                {{ product.unit_display }}
+                                                            </span>
+                                                            <br><small class="text-muted">₹{{ "%.3f"|format(product.unit_price) }} per {{ product.unit_type[:-1] }}</small>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control quantity-input" 
+                                                                   name="quantity_{{ product.id }}" 
+                                                                   min="0" value="0" 
+                                                                   data-price="{{ product.price }}"
+                                                                   data-unit-type="{{ product.unit_type }}"
+                                                                   data-unit-quantity="{{ product.quantity }}"
+                                                                   data-unit-price="{{ product.unit_price }}">
+                                                        </td>
+                                                        <td class="item-total">₹0</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Mobile Card View -->
+                                    <div class="mobile-products-container">
+                                        {% for product in products %}
+                                        <div class="mobile-product-card">
+                                            <div class="mobile-product-header">
+                                                {% if product.image_url %}
+                                                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
+                                                {% else %}
+                                                    <div class="product-image-placeholder">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="mobile-product-info">
+                                                    <div class="mobile-product-name">{{ product.name }}</div>
+                                                    <div class="mobile-product-price">₹{{ "%.2f"|format(product.price) }}</div>
+                                                    <span class="badge {% if product.unit_type == 'grams' %}bg-success{% else %}bg-info{% endif %}">
+                                                        {{ product.unit_display }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="mobile-quantity-section">
+                                                <div class="mobile-quantity-controls">
+                                                    <button type="button" class="btn btn-outline-secondary quantity-btn" onclick="decreaseQuantity('{{ product.id }}')">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                </div>
+                                                <input type="number" class="form-control quantity-input mobile-quantity-input" 
+                                                       name="quantity_{{ product.id }}" 
+                                                       id="quantity_{{ product.id }}"
+                                                       min="0" value="0" 
+                                                       data-price="{{ product.price }}"
+                                                       data-unit-type="{{ product.unit_type }}"
+                                                       data-unit-quantity="{{ product.quantity }}"
+                                                       data-unit-price="{{ product.unit_price }}">
+                                                <div class="mobile-quantity-controls">
+                                                    <button type="button" class="btn btn-outline-secondary quantity-btn" onclick="increaseQuantity('{{ product.id }}')">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="mobile-item-total item-total">₹0</div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </div>
@@ -204,3 +262,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+

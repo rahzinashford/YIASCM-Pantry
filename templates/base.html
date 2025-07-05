@@ -14,11 +14,11 @@
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
                 <i class="fas fa-shopping-cart me-2"></i>YIASCM Pantry
             </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -33,8 +33,13 @@
                     </li>
                     {% endif %}
                 </ul>
-                
+
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <button class="btn btn-outline-secondary btn-sm me-2" id="themeToggle">
+                            <i class="fas fa-moon" id="themeIcon"></i>
+                        </button>
+                    </li>
                     {% if session.team_name %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">

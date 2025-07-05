@@ -47,6 +47,7 @@ class Product(db.Model):
     price = db.Column(db.Numeric(10, 2), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)  # The quantity amount (e.g., 100, 50, 1, 4)
     unit_type = db.Column(db.String(10), nullable=False)  # 'grams' or 'pieces'
+    image_filename = db.Column(db.String(255), nullable=True)  # Stored image filename
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -64,6 +65,13 @@ class Product(db.Model):
         """Price per single unit (gram or piece)"""
         return float(self.price) / self.quantity
     
+    @property
+    def image_url(self):
+        """Get the URL for the product image"""
+        if self.image_filename:
+            return f"/static/uploads/{self.image_filename}"
+        return None
+    
     def to_dict(self):
         return {
             'id': self.id,
@@ -73,6 +81,7 @@ class Product(db.Model):
             'unit_type': self.unit_type,
             'unit_display': self.unit_display,
             'unit_price': self.unit_price,
+            'image_url': self.image_url,
             'is_active': self.is_active
         }
 

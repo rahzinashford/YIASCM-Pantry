@@ -1,6 +1,33 @@
 // Main JavaScript file for YIASCM Pantry
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Theme Toggle Functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElement = document.documentElement;
+    
+    // Load saved theme or default to light
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+    
+    function setTheme(theme) {
+        if (theme === 'dark') {
+            htmlElement.setAttribute('data-bs-theme', 'dark');
+            themeIcon.className = 'fas fa-sun';
+        } else {
+            htmlElement.setAttribute('data-bs-theme', 'light');
+            themeIcon.className = 'fas fa-moon';
+        }
+        localStorage.setItem('theme', theme);
+    }
+    
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = htmlElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+    }
     // Initialize Bootstrap tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -181,6 +208,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Mobile quantity control functions
+window.increaseQuantity = function(productId) {
+    const input = document.getElementById('quantity_' + productId);
+    if (input) {
+        input.value = parseInt(input.value) + 1;
+        input.dispatchEvent(new Event('input'));
+    }
+};
+
+window.decreaseQuantity = function(productId) {
+    const input = document.getElementById('quantity_' + productId);
+    if (input && parseInt(input.value) > 0) {
+        input.value = parseInt(input.value) - 1;
+        input.dispatchEvent(new Event('input'));
+    }
+};
+
 // Utility functions
 window.showToast = function(message, type = 'info') {
     const toast = document.createElement('div');
@@ -216,3 +260,4 @@ window.formatDate = function(dateString) {
         minute: '2-digit'
     });
 };
+

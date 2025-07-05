@@ -2,8 +2,9 @@ import os
 import json
 import logging
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from functools import wraps
 from models import db, Team, Product, Submission, Setting
 
@@ -12,6 +13,19 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "default_secret_key_for_development")
+
+# Upload configuration
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Create upload directory if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Database configuration
 database_url = os.environ.get("DATABASE_URL")
@@ -414,12 +428,25 @@ def add_product():
     quantity = int(request.form['quantity'])
     unit_type = request.form['unit_type']
     
+    image_filename = None
+    if 'image' in request.files:
+        file = request.files['image']
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            # Add timestamp to prevent filename conflicts
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            filename = timestamp + filename
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            image_filename = filename
+    
     if name and price > 0 and quantity > 0 and unit_type in ['grams', 'pieces']:
         product = Product(
             name=name,
             price=price,
             quantity=quantity,
-            unit_type=unit_type
+            unit_type=unit_type,
+            image_filename=image_filename
         )
         
         db.session.add(product)
@@ -458,3 +485,4 @@ def update_budget():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+

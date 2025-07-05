@@ -1,5 +1,63 @@
 /* Custom styles for YIASCM Pantry */
 
+/* Dark Theme Support */
+[data-bs-theme="dark"] {
+    --bs-body-bg: #212529;
+    --bs-body-color: #dee2e6;
+    --bs-card-bg: #343a40;
+    --bs-border-color: #495057;
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .table {
+    --bs-table-bg: var(--bs-card-bg);
+    --bs-table-border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .form-control {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .form-control:focus {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-primary);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .navbar {
+    --bs-navbar-bg: var(--bs-card-bg);
+}
+
+/* Product Image Styling */
+.product-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid var(--bs-border-color);
+}
+
+.product-image-placeholder {
+    width: 60px;
+    height: 60px;
+    background-color: var(--bs-gray-200);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .product-image-placeholder {
+    background-color: var(--bs-gray-700);
+}
+
 .hero-section {
     padding: 2rem 0;
 }
@@ -27,6 +85,92 @@
     
     .sticky-top {
         position: static !important;
+    }
+    
+    /* Mobile product selection improvements */
+    .mobile-product-card {
+        background: var(--bs-card-bg, #fff);
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .mobile-product-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .mobile-product-info {
+        flex: 1;
+    }
+    
+    .mobile-product-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .mobile-product-price {
+        color: var(--bs-success);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .mobile-quantity-section {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    
+    .mobile-quantity-input {
+        width: 80px;
+        text-align: center;
+    }
+    
+    .mobile-quantity-controls {
+        display: flex;
+        gap: 0.25rem;
+    }
+    
+    .quantity-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .mobile-item-total {
+        font-weight: 600;
+        color: var(--bs-primary);
+        margin-left: auto;
+    }
+    
+    /* Hide desktop table on mobile */
+    .desktop-products-table {
+        display: none;
+    }
+    
+    .mobile-products-container {
+        display: block;
+    }
+}
+
+/* Desktop view - hide mobile layout */
+@media (min-width: 769px) {
+    .mobile-products-container {
+        display: none;
+    }
+    
+    .desktop-products-table {
+        display: block;
     }
 }
 
@@ -123,3 +267,4 @@ footer {
 .table-responsive::-webkit-scrollbar-thumb:hover {
     background: var(--bs-gray-500);
 }
+
