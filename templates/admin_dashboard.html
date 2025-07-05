@@ -152,24 +152,28 @@
             </div>
             <div class="card-body">
                 <!-- Add Product Form -->
-                <form method="POST" action="{{ url_for('add_product') }}" class="row g-3 mb-4">
-                    <div class="col-md-3">
+                <form method="POST" action="{{ url_for('add_product') }}" enctype="multipart/form-data" class="row g-3 mb-4">
+                    <div class="col-md-2">
                         <input type="text" class="form-control" name="name" placeholder="Product Name" required>
                     </div>
                     <div class="col-md-2">
                         <input type="number" class="form-control" name="price" placeholder="Price" 
                                min="0.01" step="0.01" required>
                     </div>
-                    <div class="col-md-2">
-                        <input type="number" class="form-control" name="quantity" placeholder="Quantity" 
+                    <div class="col-md-1">
+                        <input type="number" class="form-control" name="quantity" placeholder="Qty" 
                                min="1" value="1" required>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <select class="form-select" name="unit_type" required>
-                            <option value="">Select Unit Type</option>
-                            <option value="grams">Grams (per X grams)</option>
-                            <option value="pieces">Pieces (X pieces)</option>
+                            <option value="">Select Unit</option>
+                            <option value="grams">Grams</option>
+                            <option value="pieces">Pieces</option>
                         </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="file" class="form-control" name="image" accept="image/*" 
+                               title="Upload product image (PNG, JPG, JPEG, GIF, WEBP)">
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-success w-100">
@@ -333,3 +337,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+

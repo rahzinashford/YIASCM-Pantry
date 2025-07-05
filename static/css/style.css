@@ -1,5 +1,15 @@
 /* Custom styles for YIASCM Pantry */
 
+/* Light Theme Support */
+[data-bs-theme="light"] {
+    --bs-body-bg: #ffffff;
+    --bs-body-color: #212529;
+    --bs-card-bg: #ffffff;
+    --bs-border-color: #dee2e6;
+    --bs-gray-200: #e9ecef;
+    --bs-gray-700: #495057;
+}
+
 /* Dark Theme Support */
 [data-bs-theme="dark"] {
     --bs-body-bg: #212529;
@@ -28,6 +38,37 @@
     background-color: var(--bs-card-bg);
     border-color: var(--bs-primary);
     color: var(--bs-body-color);
+}
+
+[data-bs-theme="light"] .card {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-border-color);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+[data-bs-theme="light"] .table {
+    --bs-table-bg: var(--bs-card-bg);
+    --bs-table-border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="light"] .form-control {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="light"] .form-control:focus {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-primary);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="light"] .navbar {
+    --bs-navbar-bg: #f8f9fa;
+}
+
+[data-bs-theme="light"] .product-image-placeholder {
+    background-color: var(--bs-gray-200);
 }
 
 [data-bs-theme="dark"] .navbar {
@@ -78,15 +119,15 @@
     .hero-section {
         padding: 1rem 0;
     }
-    
+
     .display-4 {
         font-size: 2rem;
     }
-    
+
     .sticky-top {
         position: static !important;
     }
-    
+
     /* Mobile product selection improvements */
     .mobile-product-card {
         background: var(--bs-card-bg, #fff);
@@ -96,47 +137,47 @@
         margin-bottom: 1rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    
+
     .mobile-product-header {
         display: flex;
         align-items: center;
         gap: 1rem;
         margin-bottom: 0.75rem;
     }
-    
+
     .mobile-product-info {
         flex: 1;
     }
-    
+
     .mobile-product-name {
         font-weight: 600;
         font-size: 1.1rem;
         margin-bottom: 0.25rem;
     }
-    
+
     .mobile-product-price {
         color: var(--bs-success);
         font-weight: 600;
         font-size: 1rem;
     }
-    
+
     .mobile-quantity-section {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         margin-top: 0.75rem;
     }
-    
+
     .mobile-quantity-input {
         width: 80px;
         text-align: center;
     }
-    
+
     .mobile-quantity-controls {
         display: flex;
         gap: 0.25rem;
     }
-    
+
     .quantity-btn {
         width: 32px;
         height: 32px;
@@ -146,18 +187,18 @@
         justify-content: center;
         border-radius: 50%;
     }
-    
+
     .mobile-item-total {
         font-weight: 600;
         color: var(--bs-primary);
         margin-left: auto;
     }
-    
+
     /* Hide desktop table on mobile */
     .desktop-products-table {
         display: none;
     }
-    
+
     .mobile-products-container {
         display: block;
     }
@@ -168,7 +209,7 @@
     .mobile-products-container {
         display: none;
     }
-    
+
     .desktop-products-table {
         display: block;
     }
@@ -268,3 +309,36 @@ footer {
     background: var(--bs-gray-500);
 }
 
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #495057;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+}
+
+/* Product image styles */
+.product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #495057;
+}
+
+.product-image-placeholder {
+    width: 50px;
+    height: 50px;
+    background-color: #6c757d;
+    border-radius: 8px;
+    border: 1px solid #495057;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image-placeholder i {
+    font-size: 20px;
+}
