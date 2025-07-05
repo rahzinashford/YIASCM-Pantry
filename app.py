@@ -47,6 +47,9 @@ def init_database():
     with app.app_context():
         db.create_all()
         
+        # Run database migrations
+        migrate_database()
+        
         # Check if we need to initialize default settings
         if not Setting.query.filter_by(setting_key='round1_budget').first():
             Setting.set_setting('round1_budget', '200', 'Budget limit for Round 1')
@@ -54,7 +57,13 @@ def init_database():
             Setting.set_setting('admin_password', generate_password_hash('admin123'), 'Administrator password hash')
         
         # Check if we need to add sample products
-        if Product.query.count() == 0:
+        try:
+            product_count = Product.query.count()
+        except Exception as e:
+            # If query fails due to missing columns, assume we need sample data
+            product_count = 0
+        
+        if product_count == 0:
             sample_products = [
                 {'name': 'Rice', 'price': 5, 'unit_type': 'grams'},
                 {'name': 'Apple', 'price': 15, 'unit_type': 'pieces'},
@@ -71,6 +80,25 @@ def init_database():
                 db.session.add(product)
             
             db.session.commit()
+
+def migrate_database():
+    """Handle database migrations"""
+    try:
+        # Check if image_filename column exists
+        with db.engine.connect() as conn:
+            result = conn.execute(db.text("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name='products' AND column_name='image_filename'
+            """))
+            
+            if not result.fetchone():
+                # Add image_filename column if it doesn't exist
+                conn.execute(db.text("ALTER TABLE products ADD COLUMN image_filename VARCHAR(255)"))
+                conn.commit()
+                app.logger.info("Added image_filename column to products table")
+    except Exception as e:
+        app.logger.error(f"Migration error: {e}")
 
 init_database()
 
@@ -485,4 +513,5 @@ def update_budget():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
 
