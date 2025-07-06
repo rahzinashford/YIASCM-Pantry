@@ -28,7 +28,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Database configuration
-database_url = "postgresql://yiascm_user:Q1gXkXY8VexDUcMszSKnPPCK5mWhz8vl@dpg-d1j2ba15pdvs73cn75k0-a/yiascm_db"
+database_url = os.environ.get("DATABASE_URL")
 if not database_url:
     raise RuntimeError("DATABASE_URL environment variable is not set")
 
