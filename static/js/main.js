@@ -190,36 +190,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Prevent double submissions (with simpler logic)
+    // Enhanced form submission handling for mobile
     forms.forEach(function(form) {
         let submitted = false;
         form.addEventListener('submit', function(e) {
-            // Skip double-submission check for round forms on mobile
             const isRoundForm = form.id === 'round1Form' || form.id === 'round2Form';
             const isMobile = window.innerWidth <= 768;
             
-            if (submitted && !(isRoundForm && isMobile)) {
-                e.preventDefault();
-                return false;
-            }
-            
-            // For round forms, do additional validation
+            // For round forms, do comprehensive validation
             if (isRoundForm) {
-                const quantityInputs = form.querySelectorAll('.quantity-input');
-                let hasSelection = false;
+                // Force update totals before validation
+                if (window.updateTotals && typeof window.updateTotals === 'function') {
+                    window.updateTotals();
+                }
                 
-                quantityInputs.forEach(input => {
-                    const quantity = parseInt(input.value) || 0;
-                    if (quantity > 0) {
-                        hasSelection = true;
-                    }
-                });
-                
-                if (!hasSelection) {
+                // Wait a moment for DOM updates on mobile
+                if (isMobile) {
                     e.preventDefault();
-                    alert('Please select at least one item.');
+                    setTimeout(() => {
+                        this.validateAndSubmit();
+                    }, 200);
                     return false;
                 }
+                
+                // Desktop validation
+                if (!this.validateSelection()) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            
+            // Prevent double submission
+            if (submitted) {
+                e.preventDefault();
+                return false;
             }
             
             submitted = true;
@@ -229,25 +233,70 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitted = false;
             }, 10000);
         });
+        
+        // Add validation method to form
+        if (form.id === 'round1Form' || form.id === 'round2Form') {
+            form.validateSelection = function() {
+                const quantityInputs = this.querySelectorAll('.quantity-input');
+                let hasSelection = false;
+                let totalSelected = 0;
+                
+                quantityInputs.forEach(input => {
+                    const quantity = parseInt(input.value) || 0;
+                    if (quantity > 0) {
+                        hasSelection = true;
+                        totalSelected += quantity;
+                    }
+                });
+                
+                if (!hasSelection || totalSelected === 0) {
+                    alert('Please select at least one item before submitting.');
+                    return false;
+                }
+                
+                return true;
+            };
+            
+            form.validateAndSubmit = function() {
+                if (this.validateSelection()) {
+                    // Create a new submit event that bypasses our handler
+                    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                    submitEvent.bypassValidation = true;
+                    this.dispatchEvent(submitEvent);
+                    
+                    // If event wasn't cancelled, submit the form
+                    if (!submitEvent.defaultPrevented) {
+                        this.submit();
+                    }
+                }
+            };
+        }
     });
 });
 
-// Mobile quantity control functions
+// Enhanced mobile quantity control functions
 window.increaseQuantity = function(productId) {
     const input = document.getElementById('quantity_' + productId);
     if (input) {
         const currentValue = parseInt(input.value) || 0;
         input.value = currentValue + 1;
-        // Trigger both input and change events to ensure all handlers fire
-        const inputEvent = new Event('input', { bubbles: true });
-        const changeEvent = new Event('change', { bubbles: true });
-        input.dispatchEvent(inputEvent);
-        input.dispatchEvent(changeEvent);
         
-        // Force update of totals if function exists
-        if (window.updateTotals && typeof window.updateTotals === 'function') {
-            window.updateTotals();
-        }
+        // Trigger multiple events to ensure compatibility
+        const events = ['input', 'change', 'blur'];
+        events.forEach(eventType => {
+            const event = new Event(eventType, { bubbles: true, cancelable: true });
+            input.dispatchEvent(event);
+        });
+        
+        // Force focus and blur to trigger validation
+        input.focus();
+        setTimeout(() => {
+            input.blur();
+            // Force update of totals after a delay
+            if (window.updateTotals && typeof window.updateTotals === 'function') {
+                window.updateTotals();
+            }
+        }, 100);
     }
 };
 
@@ -257,16 +306,23 @@ window.decreaseQuantity = function(productId) {
         const currentValue = parseInt(input.value) || 0;
         if (currentValue > 0) {
             input.value = currentValue - 1;
-            // Trigger both input and change events to ensure all handlers fire
-            const inputEvent = new Event('input', { bubbles: true });
-            const changeEvent = new Event('change', { bubbles: true });
-            input.dispatchEvent(inputEvent);
-            input.dispatchEvent(changeEvent);
             
-            // Force update of totals if function exists
-            if (window.updateTotals && typeof window.updateTotals === 'function') {
-                window.updateTotals();
-            }
+            // Trigger multiple events to ensure compatibility
+            const events = ['input', 'change', 'blur'];
+            events.forEach(eventType => {
+                const event = new Event(eventType, { bubbles: true, cancelable: true });
+                input.dispatchEvent(event);
+            });
+            
+            // Force focus and blur to trigger validation
+            input.focus();
+            setTimeout(() => {
+                input.blur();
+                // Force update of totals after a delay
+                if (window.updateTotals && typeof window.updateTotals === 'function') {
+                    window.updateTotals();
+                }
+            }, 100);
         }
     }
 };
@@ -306,5 +362,4 @@ window.formatDate = function(dateString) {
         minute: '2-digit'
     });
 };
-
 
