@@ -89,6 +89,17 @@
                                     {% endif %}
                                 </td>
                                 <td>
+                                    {% if team_data.round1_completed or team_data.round2_completed %}
+                                    <button type="button" class="btn btn-sm btn-outline-warning me-2" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#resetRoundsModal"
+                                            data-team-name="{{ team_name }}"
+                                            data-round1-completed="{{ team_data.round1_completed|lower }}"
+                                            data-round2-completed="{{ team_data.round2_completed|lower }}"
+                                            title="Reset Rounds">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                    {% endif %}
                                     <form method="POST" action="{{ url_for('delete_team', team_name=team_name) }}" 
                                           style="display: inline-block;" 
                                           onsubmit="return confirm('Are you sure you want to delete team {{ team_name }}? This action cannot be undone.')">
@@ -338,6 +349,61 @@
     </div>
 </div>
 
+<!-- Reset Rounds Modal -->
+<div class="modal fade" id="resetRoundsModal" tabindex="-1" aria-labelledby="resetRoundsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetRoundsModalLabel">
+                    <i class="fas fa-undo me-2"></i>Reset Team Rounds
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="resetRoundsForm" method="POST" action="{{ url_for('reset_rounds') }}">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> Resetting rounds will permanently delete submission data for the selected rounds. This action cannot be undone.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Team: <strong id="resetTeamName"></strong></label>
+                        <input type="hidden" id="resetTeamNameInput" name="team_name">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Select rounds to reset:</label>
+                        <div class="form-check" id="round1CheckContainer">
+                            <input class="form-check-input" type="checkbox" id="resetRound1" name="reset_round1">
+                            <label class="form-check-label" for="resetRound1">
+                                <i class="fas fa-shopping-cart me-2"></i>Round 1: Maximize Quantity
+                                <span class="badge bg-success ms-2" id="round1Status">Completed</span>
+                            </label>
+                            <div class="form-text">Resetting Round 1 will also reset Round 2 (if completed) since Round 2 depends on Round 1 completion.</div>
+                        </div>
+                        <div class="form-check mt-2" id="round2CheckContainer">
+                            <input class="form-check-input" type="checkbox" id="resetRound2" name="reset_round2">
+                            <label class="form-check-label" for="resetRound2">
+                                <i class="fas fa-chart-line me-2"></i>Round 2: Spend More, Buy Less
+                                <span class="badge bg-success ms-2" id="round2Status">Completed</span>
+                            </label>
+                        </div>
+                        <div id="noRoundsMessage" class="text-muted" style="display: none;">
+                            <i class="fas fa-info-circle me-2"></i>This team has not completed any rounds yet.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning" id="confirmResetBtn">
+                        <i class="fas fa-undo me-2"></i>Reset Selected Rounds
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Edit Product Modal -->
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -407,6 +473,89 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
+    // Handle reset rounds modal
+    var resetRoundsModal = document.getElementById('resetRoundsModal');
+    if (resetRoundsModal) {
+        resetRoundsModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var teamName = button.getAttribute('data-team-name');
+            var round1Completed = button.getAttribute('data-round1-completed') === 'true';
+            var round2Completed = button.getAttribute('data-round2-completed') === 'true';
+
+            // Update modal content
+            document.getElementById('resetTeamName').textContent = teamName;
+            document.getElementById('resetTeamNameInput').value = teamName;
+
+            // Show/hide checkboxes based on completion status
+            var round1Container = document.getElementById('round1CheckContainer');
+            var round2Container = document.getElementById('round2CheckContainer');
+            var noRoundsMessage = document.getElementById('noRoundsMessage');
+            var confirmBtn = document.getElementById('confirmResetBtn');
+
+            // Reset checkboxes
+            document.getElementById('resetRound1').checked = false;
+            document.getElementById('resetRound2').checked = false;
+
+            if (round1Completed || round2Completed) {
+                noRoundsMessage.style.display = 'none';
+                confirmBtn.disabled = false;
+
+                if (round1Completed) {
+                    round1Container.style.display = 'block';
+                } else {
+                    round1Container.style.display = 'none';
+                }
+
+                if (round2Completed) {
+                    round2Container.style.display = 'block';
+                } else {
+                    round2Container.style.display = 'none';
+                }
+            } else {
+                round1Container.style.display = 'none';
+                round2Container.style.display = 'none';
+                noRoundsMessage.style.display = 'block';
+                confirmBtn.disabled = true;
+            }
+        });
+
+        // Handle Round 1 checkbox change
+        document.getElementById('resetRound1').addEventListener('change', function() {
+            if (this.checked) {
+                // If Round 1 is checked, show warning about Round 2
+                var round2Checkbox = document.getElementById('resetRound2');
+                if (round2Checkbox.style.display !== 'none') {
+                    round2Checkbox.checked = true;
+                    round2Checkbox.disabled = true;
+                }
+            } else {
+                // If Round 1 is unchecked, re-enable Round 2 checkbox
+                var round2Checkbox = document.getElementById('resetRound2');
+                round2Checkbox.disabled = false;
+            }
+        });
+
+        // Validate form submission
+        document.getElementById('resetRoundsForm').addEventListener('submit', function(e) {
+            var round1Checked = document.getElementById('resetRound1').checked;
+            var round2Checked = document.getElementById('resetRound2').checked;
+            
+            if (!round1Checked && !round2Checked) {
+                e.preventDefault();
+                alert('Please select at least one round to reset.');
+                return false;
+            }
+            
+            var teamName = document.getElementById('resetTeamName').textContent;
+            var message = `Are you sure you want to reset the selected rounds for team "${teamName}"? This will delete their submission data and cannot be undone.`;
+            
+            if (!confirm(message)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+
     // Handle edit product modal
     var editProductModal = document.getElementById('editProductModal');
     if (editProductModal) {
@@ -443,5 +592,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+
 
 

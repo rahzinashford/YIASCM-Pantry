@@ -28,7 +28,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Database configuration
-database_url = os.environ.get("DATABASE_URL")
+database_url = "postgresql://yiascm_user:Q1gXkXY8VexDUcMszSKnPPCK5mWhz8vl@dpg-d1j2ba15pdvs73cn75k0-a.oregon-postgres.render.com/yiascm_db"
 if not database_url:
     raise RuntimeError("DATABASE_URL environment variable is not set")
 
@@ -562,7 +562,59 @@ def update_budget():
     
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/reset_rounds', methods=['POST'])
+@admin_required
+def reset_rounds():
+    team_name = request.form.get('team_name')
+    reset_round1 = 'reset_round1' in request.form
+    reset_round2 = 'reset_round2' in request.form
+    
+    if not team_name:
+        flash('No team selected.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    team = Team.query.filter_by(team_name=team_name).first()
+    if not team:
+        flash('Team not found.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    reset_actions = []
+    
+    if reset_round1:
+        # Delete Round 1 submission
+        round1_submission = Submission.query.filter_by(team_id=team.id, round_number=1).first()
+        if round1_submission:
+            db.session.delete(round1_submission)
+        team.round1_completed = False
+        reset_actions.append('Round 1')
+        
+        # If resetting Round 1, also reset Round 2 since it depends on Round 1
+        if team.round2_completed:
+            round2_submission = Submission.query.filter_by(team_id=team.id, round_number=2).first()
+            if round2_submission:
+                db.session.delete(round2_submission)
+            team.round2_completed = False
+            if 'Round 2' not in reset_actions:
+                reset_actions.append('Round 2 (dependent on Round 1)')
+    
+    if reset_round2 and not reset_round1:
+        # Delete Round 2 submission only
+        round2_submission = Submission.query.filter_by(team_id=team.id, round_number=2).first()
+        if round2_submission:
+            db.session.delete(round2_submission)
+        team.round2_completed = False
+        reset_actions.append('Round 2')
+    
+    if reset_actions:
+        db.session.commit()
+        flash(f'Successfully reset {", ".join(reset_actions)} for team "{team_name}".', 'success')
+    else:
+        flash('No rounds were selected for reset.', 'warning')
+    
+    return redirect(url_for('admin_dashboard'))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
 
 
