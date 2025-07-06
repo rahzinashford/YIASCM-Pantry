@@ -84,8 +84,8 @@ def init_database():
 def migrate_database():
     """Handle database migrations"""
     try:
-        # Check if image_filename column exists
         with db.engine.connect() as conn:
+            # Check if image_filename column exists
             result = conn.execute(db.text("""
                 SELECT column_name 
                 FROM information_schema.columns 
@@ -97,6 +97,20 @@ def migrate_database():
                 conn.execute(db.text("ALTER TABLE products ADD COLUMN image_filename VARCHAR(255)"))
                 conn.commit()
                 app.logger.info("Added image_filename column to products table")
+            
+            # Check if image_data column exists
+            result = conn.execute(db.text("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name='products' AND column_name='image_data'
+            """))
+            
+            if not result.fetchone():
+                # Add image_data and image_mimetype columns
+                conn.execute(db.text("ALTER TABLE products ADD COLUMN image_data BYTEA"))
+                conn.execute(db.text("ALTER TABLE products ADD COLUMN image_mimetype VARCHAR(50)"))
+                conn.commit()
+                app.logger.info("Added image_data and image_mimetype columns to products table")
     except Exception as e:
         app.logger.error(f"Migration error: {e}")
 
@@ -457,16 +471,16 @@ def add_product():
     unit_type = request.form['unit_type']
     
     image_filename = None
+    image_data = None
+    image_mimetype = None
+    
     if 'image' in request.files:
         file = request.files['image']
         if file and file.filename and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            # Add timestamp to prevent filename conflicts
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-            filename = timestamp + filename
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            image_filename = filename
+            # Store image data in database instead of file system
+            image_data = file.read()
+            image_mimetype = file.mimetype
+            image_filename = secure_filename(file.filename)
     
     if name and price > 0 and quantity > 0 and unit_type in ['grams', 'pieces']:
         product = Product(
@@ -474,7 +488,9 @@ def add_product():
             price=price,
             quantity=quantity,
             unit_type=unit_type,
-            image_filename=image_filename
+            image_filename=image_filename,
+            image_data=image_data,
+            image_mimetype=image_mimetype
         )
         
         db.session.add(product)
@@ -502,19 +518,10 @@ def update_product(product_id):
     if 'image' in request.files:
         file = request.files['image']
         if file and file.filename and allowed_file(file.filename):
-            # Delete old image if it exists
-            if product.image_filename:
-                old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], product.image_filename)
-                if os.path.exists(old_image_path):
-                    os.remove(old_image_path)
-            
-            # Save new image
-            filename = secure_filename(file.filename)
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-            filename = timestamp + filename
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            product.image_filename = filename
+            # Store new image data in database
+            product.image_data = file.read()
+            product.image_mimetype = file.mimetype
+            product.image_filename = secure_filename(file.filename)
     
     if name and price > 0 and quantity > 0 and unit_type in ['grams', 'pieces']:
         product.name = name
@@ -535,12 +542,7 @@ def update_product(product_id):
 def delete_product(product_id):
     product = Product.query.get(product_id)
     if product:
-        # Delete associated image file if it exists
-        if product.image_filename:
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], product.image_filename)
-            if os.path.exists(image_path):
-                os.remove(image_path)
-        
+        # No need to delete files since images are stored in database
         db.session.delete(product)
         db.session.commit()
         flash('Product deleted successfully!', 'success')
@@ -548,6 +550,19 @@ def delete_product(product_id):
         flash('Product not found.', 'error')
     
     return redirect(url_for('admin_dashboard'))
+
+@app.route('/product_image/<int:product_id>')
+def serve_product_image(product_id):
+    """Serve product image from database"""
+    product = Product.query.get(product_id)
+    if product and product.image_data:
+        from flask import Response
+        return Response(
+            product.image_data,
+            mimetype=product.image_mimetype or 'image/jpeg',
+            headers={'Cache-Control': 'public, max-age=3600'}
+        )
+    return '', 404
 
 @app.route('/admin/update_budget', methods=['POST'])
 @admin_required
