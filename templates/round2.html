@@ -79,7 +79,7 @@
                                     <!-- Mobile Card View -->
                                     <div class="mobile-products-container">
                                         {% for product in products %}
-                                        <div class="mobile-product-card">
+                                        <div class="mobile-product-card" data-product-id="{{ product.id }}">
                                             <div class="mobile-product-header">
                                                 {% if product.image_url %}
                                                     <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
@@ -195,9 +195,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const unitQuantity = parseInt(input.dataset.unitQuantity);
             const itemTotal = quantity * price;
             
-            // Update individual item total
+            // Update individual item total (both desktop and mobile)
             const row = input.closest('tr');
-            row.querySelector('.item-total').textContent = '₹' + itemTotal.toFixed(2);
+            const mobileCard = input.closest('.mobile-product-card');
+            
+            if (row) {
+                const itemTotalElement = row.querySelector('.item-total');
+                if (itemTotalElement) {
+                    itemTotalElement.textContent = '₹' + itemTotal.toFixed(2);
+                }
+            }
+            
+            if (mobileCard) {
+                const itemTotalElement = mobileCard.querySelector('.item-total');
+                if (itemTotalElement) {
+                    itemTotalElement.textContent = '₹' + itemTotal.toFixed(2);
+                }
+            }
             
             totalPrice += itemTotal;
             
@@ -238,3 +252,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+

@@ -126,6 +126,7 @@
 
     .sticky-top {
         position: static !important;
+        margin-top: 1rem;
     }
 
     /* Mobile product selection improvements */
@@ -192,6 +193,8 @@
         font-weight: 600;
         color: var(--bs-primary);
         margin-left: auto;
+        min-width: 80px;
+        text-align: right;
     }
 
     /* Hide desktop table on mobile */
@@ -201,6 +204,25 @@
 
     .mobile-products-container {
         display: block;
+    }
+
+    /* Responsive columns for mobile */
+    .col-lg-8, .col-lg-4 {
+        margin-bottom: 1rem;
+    }
+
+    /* Better mobile form styling */
+    .form-control {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    /* Mobile navbar improvements */
+    .navbar-nav {
+        text-align: center;
+    }
+
+    .navbar-nav .nav-item {
+        padding: 0.25rem 0;
     }
 }
 
@@ -342,3 +364,4 @@ footer {
 .product-image-placeholder i {
     font-size: 20px;
 }
+

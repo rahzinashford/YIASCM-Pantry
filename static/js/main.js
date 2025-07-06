@@ -212,16 +212,24 @@ document.addEventListener('DOMContentLoaded', function() {
 window.increaseQuantity = function(productId) {
     const input = document.getElementById('quantity_' + productId);
     if (input) {
-        input.value = parseInt(input.value) + 1;
-        input.dispatchEvent(new Event('input'));
+        const currentValue = parseInt(input.value) || 0;
+        input.value = currentValue + 1;
+        // Trigger input event to update totals
+        const event = new Event('input', { bubbles: true });
+        input.dispatchEvent(event);
     }
 };
 
 window.decreaseQuantity = function(productId) {
     const input = document.getElementById('quantity_' + productId);
-    if (input && parseInt(input.value) > 0) {
-        input.value = parseInt(input.value) - 1;
-        input.dispatchEvent(new Event('input'));
+    if (input) {
+        const currentValue = parseInt(input.value) || 0;
+        if (currentValue > 0) {
+            input.value = currentValue - 1;
+            // Trigger input event to update totals
+            const event = new Event('input', { bubbles: true });
+            input.dispatchEvent(event);
+        }
     }
 };
 
@@ -260,4 +268,5 @@ window.formatDate = function(dateString) {
         minute: '2-digit'
     });
 };
+
 
