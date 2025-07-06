@@ -194,10 +194,34 @@ document.addEventListener('DOMContentLoaded', function() {
     forms.forEach(function(form) {
         let submitted = false;
         form.addEventListener('submit', function(e) {
-            if (submitted) {
+            // Skip double-submission check for round forms on mobile
+            const isRoundForm = form.id === 'round1Form' || form.id === 'round2Form';
+            const isMobile = window.innerWidth <= 768;
+            
+            if (submitted && !(isRoundForm && isMobile)) {
                 e.preventDefault();
                 return false;
             }
+            
+            // For round forms, do additional validation
+            if (isRoundForm) {
+                const quantityInputs = form.querySelectorAll('.quantity-input');
+                let hasSelection = false;
+                
+                quantityInputs.forEach(input => {
+                    const quantity = parseInt(input.value) || 0;
+                    if (quantity > 0) {
+                        hasSelection = true;
+                    }
+                });
+                
+                if (!hasSelection) {
+                    e.preventDefault();
+                    alert('Please select at least one item.');
+                    return false;
+                }
+            }
+            
             submitted = true;
             
             // Reset after 10 seconds as failsafe
@@ -214,9 +238,16 @@ window.increaseQuantity = function(productId) {
     if (input) {
         const currentValue = parseInt(input.value) || 0;
         input.value = currentValue + 1;
-        // Trigger input event to update totals
-        const event = new Event('input', { bubbles: true });
-        input.dispatchEvent(event);
+        // Trigger both input and change events to ensure all handlers fire
+        const inputEvent = new Event('input', { bubbles: true });
+        const changeEvent = new Event('change', { bubbles: true });
+        input.dispatchEvent(inputEvent);
+        input.dispatchEvent(changeEvent);
+        
+        // Force update of totals if function exists
+        if (window.updateTotals && typeof window.updateTotals === 'function') {
+            window.updateTotals();
+        }
     }
 };
 
@@ -226,9 +257,16 @@ window.decreaseQuantity = function(productId) {
         const currentValue = parseInt(input.value) || 0;
         if (currentValue > 0) {
             input.value = currentValue - 1;
-            // Trigger input event to update totals
-            const event = new Event('input', { bubbles: true });
-            input.dispatchEvent(event);
+            // Trigger both input and change events to ensure all handlers fire
+            const inputEvent = new Event('input', { bubbles: true });
+            const changeEvent = new Event('change', { bubbles: true });
+            input.dispatchEvent(inputEvent);
+            input.dispatchEvent(changeEvent);
+            
+            // Force update of totals if function exists
+            if (window.updateTotals && typeof window.updateTotals === 'function') {
+                window.updateTotals();
+            }
         }
     }
 };
