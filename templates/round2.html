@@ -247,11 +247,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     quantityInputs.forEach(input => {
         input.addEventListener('input', updateTotals);
-        input.addEventListener('change', updateTotals); // Add change event for mobile
+        input.addEventListener('change', updateTotals);
+        input.addEventListener('blur', updateTotals);
         
-        // Add touch-specific events for mobile
+        // Enhanced mobile event handling
         input.addEventListener('touchend', function() {
-            setTimeout(updateTotals, 100); // Small delay to ensure value is updated
+            setTimeout(() => {
+                updateTotals();
+                // Force validation state update
+                const form = this.closest('form');
+                if (form && form.classList.contains('was-validated')) {
+                    form.classList.remove('was-validated');
+                    setTimeout(() => form.classList.add('was-validated'), 50);
+                }
+            }, 150);
+        });
+        
+        // Add focus handling for better mobile UX
+        input.addEventListener('focus', function() {
+            this.select(); // Select all text when focused
         });
     });
     
@@ -259,4 +273,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
-
