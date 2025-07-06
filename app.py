@@ -485,11 +485,62 @@ def add_product():
     
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/update_product/<int:product_id>', methods=['POST'])
+@admin_required
+def update_product(product_id):
+    product = Product.query.get(product_id)
+    if not product:
+        flash('Product not found.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    name = request.form['name'].strip()
+    price = float(request.form['price'])
+    quantity = int(request.form['quantity'])
+    unit_type = request.form['unit_type']
+    
+    # Handle image update
+    if 'image' in request.files:
+        file = request.files['image']
+        if file and file.filename and allowed_file(file.filename):
+            # Delete old image if it exists
+            if product.image_filename:
+                old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], product.image_filename)
+                if os.path.exists(old_image_path):
+                    os.remove(old_image_path)
+            
+            # Save new image
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            filename = timestamp + filename
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            product.image_filename = filename
+    
+    if name and price > 0 and quantity > 0 and unit_type in ['grams', 'pieces']:
+        product.name = name
+        product.price = price
+        product.quantity = quantity
+        product.unit_type = unit_type
+        product.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        flash(f'Product "{name}" updated successfully!', 'success')
+    else:
+        flash('Invalid product data. Please check all fields.', 'error')
+    
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/admin/delete_product/<int:product_id>', methods=['POST'])
 @admin_required
 def delete_product(product_id):
     product = Product.query.get(product_id)
     if product:
+        # Delete associated image file if it exists
+        if product.image_filename:
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], product.image_filename)
+            if os.path.exists(image_path):
+                os.remove(image_path)
+        
         db.session.delete(product)
         db.session.commit()
         flash('Product deleted successfully!', 'success')
