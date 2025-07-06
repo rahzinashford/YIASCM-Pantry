@@ -48,6 +48,8 @@ class Product(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=1)  # The quantity amount (e.g., 100, 50, 1, 4)
     unit_type = db.Column(db.String(10), nullable=False)  # 'grams' or 'pieces'
     image_filename = db.Column(db.String(255), nullable=True)  # Stored image filename
+    image_data = db.Column(db.LargeBinary, nullable=True)  # Store image as binary data
+    image_mimetype = db.Column(db.String(50), nullable=True)  # Store MIME type (image/jpeg, image/png, etc.)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -68,7 +70,9 @@ class Product(db.Model):
     @property
     def image_url(self):
         """Get the URL for the product image"""
-        if self.image_filename:
+        if self.image_data:
+            return f"/product_image/{self.id}"
+        elif self.image_filename:
             return f"/static/uploads/{self.image_filename}"
         return None
     
@@ -163,3 +167,4 @@ class Setting(db.Model):
             'setting_value': self.setting_value,
             'description': self.description
         }
+
