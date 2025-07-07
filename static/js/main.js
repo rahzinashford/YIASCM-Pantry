@@ -1,15 +1,15 @@
 // Main JavaScript file for YIASCM Pantry
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Theme Toggle Functionality
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
     const htmlElement = document.documentElement;
-    
+
     // Load saved theme or default to light
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
-    
+
     function setTheme(theme) {
         if (theme === 'dark') {
             htmlElement.setAttribute('data-bs-theme', 'dark');
@@ -20,9 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         localStorage.setItem('theme', theme);
     }
-    
+
     if (themeToggle) {
-        themeToggle.addEventListener('click', function() {
+        themeToggle.addEventListener('click', function () {
             const currentTheme = htmlElement.getAttribute('data-bs-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             setTheme(newTheme);
@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Auto-hide alerts after 5 seconds
     const alerts = document.querySelectorAll('.alert:not(.alert-info):not(.alert-warning)');
-    alerts.forEach(function(alert) {
-        setTimeout(function() {
+    alerts.forEach(function (alert) {
+        setTimeout(function () {
             const bsAlert = new bootstrap.Alert(alert);
             bsAlert.close();
         }, 5000);
@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form validation improvements
     const forms = document.querySelectorAll('form');
-    forms.forEach(function(form) {
-        form.addEventListener('submit', function(event) {
+    forms.forEach(function (form) {
+        form.addEventListener('submit', function (event) {
             if (!form.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -57,8 +57,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Quantity input validation (ensure non-negative numbers)
     const quantityInputs = document.querySelectorAll('input[type="number"]');
-    quantityInputs.forEach(function(input) {
-        input.addEventListener('input', function() {
+    quantityInputs.forEach(function (input) {
+        input.addEventListener('input', function () {
             if (this.value < 0) {
                 this.value = 0;
             }
@@ -67,8 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Smooth scroll for anchor links
     const anchorLinks = document.querySelectorAll('a[href^="#"]');
-    anchorLinks.forEach(function(link) {
-        link.addEventListener('click', function(e) {
+    anchorLinks.forEach(function (link) {
+        link.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
             if (href && href !== '#') {
                 e.preventDefault();
@@ -87,20 +87,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Table row click handlers for better UX
     const tableRows = document.querySelectorAll('table tbody tr');
-    tableRows.forEach(function(row) {
-        row.addEventListener('mouseenter', function() {
+    tableRows.forEach(function (row) {
+        row.addEventListener('mouseenter', function () {
             this.style.backgroundColor = 'rgba(var(--bs-primary-rgb), 0.1)';
         });
-        
-        row.addEventListener('mouseleave', function() {
+
+        row.addEventListener('mouseleave', function () {
             this.style.backgroundColor = '';
         });
     });
 
     // Confirmation dialogs for destructive actions
     const deleteButtons = document.querySelectorAll('button[onclick*="confirm"]');
-    deleteButtons.forEach(function(button) {
-        button.addEventListener('click', function(e) {
+    deleteButtons.forEach(function (button) {
+        button.addEventListener('click', function (e) {
             const message = this.getAttribute('onclick').match(/confirm\('(.+?)'\)/);
             if (message && !confirm(message[1])) {
                 e.preventDefault();
@@ -111,14 +111,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Real-time search functionality (if needed)
     const searchInputs = document.querySelectorAll('input[data-search-target]');
-    searchInputs.forEach(function(input) {
-        input.addEventListener('input', function() {
+    searchInputs.forEach(function (input) {
+        input.addEventListener('input', function () {
             const target = document.querySelector(this.getAttribute('data-search-target'));
             const searchTerm = this.value.toLowerCase();
-            
+
             if (target) {
                 const rows = target.querySelectorAll('tbody tr');
-                rows.forEach(function(row) {
+                rows.forEach(function (row) {
                     const text = row.textContent.toLowerCase();
                     row.style.display = text.includes(searchTerm) ? '' : 'none';
                 });
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Auto-refresh for admin dashboard (every 30 seconds)
     if (window.location.pathname.includes('/admin/dashboard')) {
-        setInterval(function() {
+        setInterval(function () {
             // Only refresh if no modals are open and user is active
             if (!document.querySelector('.modal.show') && !document.hidden) {
                 window.location.reload();
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Add keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         // Ctrl/Cmd + Enter to submit forms
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             const activeForm = document.activeElement.closest('form');
@@ -148,11 +148,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
-        
+
         // Escape to close alerts
         if (e.key === 'Escape') {
             const alerts = document.querySelectorAll('.alert .btn-close');
-            alerts.forEach(function(closeBtn) {
+            alerts.forEach(function (closeBtn) {
                 closeBtn.click();
             });
         }
@@ -160,8 +160,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add visual feedback for form field validation
     const formControls = document.querySelectorAll('.form-control');
-    formControls.forEach(function(control) {
-        control.addEventListener('blur', function() {
+    formControls.forEach(function (control) {
+        control.addEventListener('blur', function () {
             if (this.value && this.checkValidity()) {
                 this.classList.add('is-valid');
                 this.classList.remove('is-invalid');
@@ -173,70 +173,70 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Prevent double submissions with mobile-friendly logic
-    forms.forEach(function(form) {
+    forms.forEach(function (form) {
         let submitted = false;
         let submitButton = form.querySelector('button[type="submit"]');
-        
-        form.addEventListener('submit', function(e) {
+
+        form.addEventListener('submit', function (e) {
             const isRoundForm = form.id === 'round1Form' || form.id === 'round2Form';
-            
-            // Check for double submission
+
             if (submitted) {
                 e.preventDefault();
                 return false;
             }
-            
-            // For round forms, do validation without preventing default
+
             if (isRoundForm) {
-                const quantityInputs = form.querySelectorAll('.quantity-input');
-                let hasSelection = false;
-                
-                quantityInputs.forEach(input => {
-                    const quantity = parseInt(input.value) || 0;
-                    if (quantity > 0) {
-                        hasSelection = true;
-                    }
-                });
-                
-                if (!hasSelection) {
-                    e.preventDefault();
-                    alert('Please select at least one item.');
-                    return false;
-                }
-            }
-            
-            // Mark as submitted and disable button to prevent double submission
-            submitted = true;
-            if (submitButton) {
-                submitButton.disabled = true;
-                const originalText = submitButton.innerHTML;
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-                
-                // Reset after 10 seconds as failsafe
+                e.preventDefault(); // Delay submit slightly to allow mobile input events to finish
+
                 setTimeout(() => {
-                    submitted = false;
-                    if (submitButton) {
-                        submitButton.disabled = false;
-                        submitButton.innerHTML = originalText;
+                    const quantityInputs = form.querySelectorAll('.quantity-input');
+                    let hasSelection = false;
+
+                    quantityInputs.forEach(input => {
+                        const quantity = parseInt(input.value) || 0;
+                        if (quantity > 0) {
+                            hasSelection = true;
+                        }
+                    });
+
+                    if (!hasSelection) {
+                        alert('Please select at least one item.');
+                        return false;
                     }
-                }, 10000);
+
+                    // Mark as submitted
+                    submitted = true;
+
+                    // Disable button
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                        const originalText = submitButton.innerHTML;
+                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+                        // Reset failsafe
+                        setTimeout(() => {
+                            submitted = false;
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalText;
+                        }, 10000);
+                    }
+
+                    form.submit(); // Actually submit the form now
+                }, 100); // Slight delay to ensure value is read properly
             }
-            
-            // Allow the form to submit naturally
-            return true;
         });
     });
 });
 
 // Mobile quantity control functions
-window.increaseQuantity = function(productId) {
+window.increaseQuantity = function (productId) {
     const input = document.getElementById('quantity_' + productId);
     if (input) {
         const currentValue = parseInt(input.value) || 0;
         input.value = currentValue + 1;
         // Trigger input event to update totals
         input.dispatchEvent(new Event('input', { bubbles: true }));
-        
+
         // Force update of totals if function exists
         if (window.updateTotals && typeof window.updateTotals === 'function') {
             window.updateTotals();
@@ -244,7 +244,7 @@ window.increaseQuantity = function(productId) {
     }
 };
 
-window.decreaseQuantity = function(productId) {
+window.decreaseQuantity = function (productId) {
     const input = document.getElementById('quantity_' + productId);
     if (input) {
         const currentValue = parseInt(input.value) || 0;
@@ -252,7 +252,7 @@ window.decreaseQuantity = function(productId) {
             input.value = currentValue - 1;
             // Trigger input event to update totals
             input.dispatchEvent(new Event('input', { bubbles: true }));
-            
+
             // Force update of totals if function exists
             if (window.updateTotals && typeof window.updateTotals === 'function') {
                 window.updateTotals();
@@ -262,7 +262,7 @@ window.decreaseQuantity = function(productId) {
 };
 
 // Utility functions
-window.showToast = function(message, type = 'info') {
+window.showToast = function (message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
     toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
@@ -270,9 +270,9 @@ window.showToast = function(message, type = 'info') {
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-    
+
     document.body.appendChild(toast);
-    
+
     setTimeout(() => {
         if (toast.parentNode) {
             toast.remove();
@@ -280,14 +280,14 @@ window.showToast = function(message, type = 'info') {
     }, 5000);
 };
 
-window.formatCurrency = function(amount) {
+window.formatCurrency = function (amount) {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: 'INR'
     }).format(amount);
 };
 
-window.formatDate = function(dateString) {
+window.formatDate = function (dateString) {
     return new Date(dateString).toLocaleDateString('en-IN', {
         year: 'numeric',
         month: 'short',
