@@ -234,11 +234,8 @@ window.increaseQuantity = function(productId) {
     if (input) {
         const currentValue = parseInt(input.value) || 0;
         input.value = currentValue + 1;
-        // Trigger both input and change events to ensure all handlers fire
-        const inputEvent = new Event('input', { bubbles: true });
-        const changeEvent = new Event('change', { bubbles: true });
-        input.dispatchEvent(inputEvent);
-        input.dispatchEvent(changeEvent);
+        // Trigger input event to update totals
+        input.dispatchEvent(new Event('input', { bubbles: true }));
         
         // Force update of totals if function exists
         if (window.updateTotals && typeof window.updateTotals === 'function') {
@@ -253,11 +250,8 @@ window.decreaseQuantity = function(productId) {
         const currentValue = parseInt(input.value) || 0;
         if (currentValue > 0) {
             input.value = currentValue - 1;
-            // Trigger both input and change events to ensure all handlers fire
-            const inputEvent = new Event('input', { bubbles: true });
-            const changeEvent = new Event('change', { bubbles: true });
-            input.dispatchEvent(inputEvent);
-            input.dispatchEvent(changeEvent);
+            // Trigger input event to update totals
+            input.dispatchEvent(new Event('input', { bubbles: true }));
             
             // Force update of totals if function exists
             if (window.updateTotals && typeof window.updateTotals === 'function') {
@@ -302,4 +296,5 @@ window.formatDate = function(dateString) {
         minute: '2-digit'
     });
 };
+
 
