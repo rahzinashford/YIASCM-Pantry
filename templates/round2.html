@@ -158,7 +158,7 @@
                                     </table>
                                     
                                     <div class="d-grid">
-                                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                                        <button type="submit" class="btn btn-primary" id="submitBtn" onclick="return validateRound2Form()">
                                             <i class="fas fa-check me-2"></i>Complete Round 2
                                         </button>
                                     </div>
@@ -247,29 +247,35 @@ document.addEventListener('DOMContentLoaded', function() {
     
     quantityInputs.forEach(input => {
         input.addEventListener('input', updateTotals);
-        input.addEventListener('change', updateTotals);
-        input.addEventListener('blur', updateTotals);
+        input.addEventListener('change', updateTotals); // Add change event for mobile
         
-        // Enhanced mobile event handling
+        // Add touch-specific events for mobile
         input.addEventListener('touchend', function() {
-            setTimeout(() => {
-                updateTotals();
-                // Force validation state update
-                const form = this.closest('form');
-                if (form && form.classList.contains('was-validated')) {
-                    form.classList.remove('was-validated');
-                    setTimeout(() => form.classList.add('was-validated'), 50);
-                }
-            }, 150);
-        });
-        
-        // Add focus handling for better mobile UX
-        input.addEventListener('focus', function() {
-            this.select(); // Select all text when focused
+            setTimeout(updateTotals, 100); // Small delay to ensure value is updated
         });
     });
     
     updateTotals();
 });
+
+// Mobile-friendly form validation
+function validateRound2Form() {
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    let hasSelection = false;
+    
+    quantityInputs.forEach(input => {
+        const quantity = parseInt(input.value) || 0;
+        if (quantity > 0) {
+            hasSelection = true;
+        }
+    });
+    
+    if (!hasSelection) {
+        alert('Please select at least one item.');
+        return false;
+    }
+    
+    return true;
+}
 </script>
 {% endblock %}
