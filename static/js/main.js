@@ -193,10 +193,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     let hasSelection = false;
 
                     quantityInputs.forEach(input => {
-                        const quantity = parseInt(input.value) || 0;
-                        if (quantity > 0) {
-                            hasSelection = true;
-                        }
+                        const value = input.value.trim();
+			if (value !== '' && !isNaN(value) && parseInt(value, 10) > 0) {
+			    hasSelection = true;
+			}
+
                     });
 
                     if (!hasSelection) {
@@ -221,7 +222,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         }, 10000);
                     }
 
-                    form.submit(); // Actually submit the form now
+                    if (typeof form.requestSubmit === 'function') {
+    			form.requestSubmit();
+		    } else {
+    			form.submit(); // fallback for older browsers
+		    }
+ 		// Actually submit the form now
                 }, 100); // Slight delay to ensure value is read properly
             }
         });
@@ -234,6 +240,7 @@ window.increaseQuantity = function (productId) {
     if (input) {
         const currentValue = parseInt(input.value) || 0;
         input.value = currentValue + 1;
+        input.setAttribute('value', input.value); // Sync actual DOM attribute
         // Trigger input event to update totals
         input.dispatchEvent(new Event('input', { bubbles: true }));
 
@@ -250,6 +257,7 @@ window.decreaseQuantity = function (productId) {
         const currentValue = parseInt(input.value) || 0;
         if (currentValue > 0) {
             input.value = currentValue - 1;
+            input.setAttribute('value', input.value); // Sync actual DOM attribute
             // Trigger input event to update totals
             input.dispatchEvent(new Event('input', { bubbles: true }));
 
