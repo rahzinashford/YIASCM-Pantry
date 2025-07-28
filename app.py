@@ -230,6 +230,11 @@ def round1():
         return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
+        # Log the POST request for debugging
+        app.logger.info(f"Round 1 POST request from team: {team_name}")
+        app.logger.info(f"Form data keys: {list(request.form.keys())}")
+        app.logger.info(f"User agent: {request.headers.get('User-Agent', 'Unknown')}")
+        
         products = Product.query.filter_by(is_active=True).all()
         budget = float(Setting.get_setting('round1_budget', '200'))
         
@@ -241,7 +246,9 @@ def round1():
         for product in products:
             quantity_key = f'quantity_{product.id}'
             if quantity_key in request.form:
-                quantity = int(request.form[quantity_key] or 0)
+                raw_quantity = request.form[quantity_key]
+                quantity = int(raw_quantity or 0)
+                app.logger.info(f"Product {product.id} ({product.name}): raw='{raw_quantity}', parsed={quantity}")
                 if quantity > 0:
                     item_total = quantity * float(product.price)
                     total_price += item_total
@@ -260,12 +267,16 @@ def round1():
                         'total': item_total
                     })
         
+        app.logger.info(f"Final summary: selected_items={len(selected_items)}, total_price={total_price}, total_grams={total_grams}, total_pieces={total_pieces}")
+        
         if total_price > budget:
+            app.logger.warning(f"Budget exceeded: {total_price} > {budget}")
             flash(f'Total price (₹{total_price}) exceeds budget (₹{budget}). Please adjust your selection.', 'error')
             products_dict = [p.to_dict() for p in products]
             return render_template('round1.html', products=products_dict, budget=budget)
         
         if not selected_items:
+            app.logger.warning("No items selected")
             flash('Please select at least one item.', 'error')
             products_dict = [p.to_dict() for p in products]
             return render_template('round1.html', products=products_dict, budget=budget)

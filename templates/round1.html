@@ -60,7 +60,7 @@
                                                             <br><small class="text-muted">₹{{ "%.3f"|format(product.unit_price) }} per {{ product.unit_type[:-1] }}</small>
                                                         </td>
                                                         <td>
-                                                            <input type="number" class="form-control quantity-input" 
+                                                            <input type="number" class="form-control quantity-input desktop-quantity-input" 
                                                                    name="quantity_{{ product.id }}" 
                                                                    min="0" value="0" 
                                                                    data-price="{{ product.price }}"
@@ -161,8 +161,12 @@
                                     </table>
                                     
                                     <div class="d-grid">
-                                        <button type="submit" class="btn btn-warning" id="submitBtn" onclick="return validateRound1Form()">
+                                        <button type="button" class="btn btn-warning" id="submitBtn" onclick="mobileSubmitForm()">
                                             <i class="fas fa-check me-2"></i>Complete Round 1
+                                        </button>
+                                        <!-- Hidden actual submit button -->
+                                        <button type="submit" class="btn btn-warning d-none" id="hiddenSubmitBtn">
+                                            Submit
                                         </button>
                                     </div>
                                 </div>
@@ -270,19 +274,157 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     quantityInputs.forEach(input => {
+        // Standard events
         input.addEventListener('input', updateTotals);
-        input.addEventListener('change', updateTotals); // Add change event for mobile
+        input.addEventListener('change', updateTotals);
         
-        // Add touch-specific events for mobile
+        // Mobile-specific events
         input.addEventListener('touchend', function() {
-            setTimeout(updateTotals, 100); // Small delay to ensure value is updated
+            setTimeout(updateTotals, 150);
+        });
+        
+        input.addEventListener('blur', function() {
+            updateTotals();
+        });
+        
+        // Ensure numeric input on mobile
+        input.addEventListener('keyup', function() {
+            setTimeout(updateTotals, 50);
+        });
+        
+        // Handle paste events
+        input.addEventListener('paste', function() {
+            setTimeout(updateTotals, 200);
         });
     });
     
     updateTotals();
+    
+    // Mobile detection and input management
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    if (isMobile) {
+        console.log('Mobile device detected, disabling desktop inputs');
+        
+        // Disable desktop inputs on mobile to prevent duplicate form submission
+        const desktopInputs = document.querySelectorAll('.desktop-quantity-input');
+        desktopInputs.forEach(input => {
+            input.disabled = true;
+            input.removeAttribute('name'); // Remove name so it's not submitted
+            console.log('Disabled desktop input:', input.getAttribute('data-original-name') || 'unknown');
+        });
+        
+        console.log('Disabled', desktopInputs.length, 'desktop inputs');
+    } else {
+        // On desktop, disable mobile inputs
+        const mobileInputs = document.querySelectorAll('.mobile-quantity-input');
+        mobileInputs.forEach(input => {
+            input.disabled = true;
+            input.removeAttribute('name'); // Remove name so it's not submitted
+        });
+        
+        console.log('Disabled', mobileInputs.length, 'mobile inputs');
+    }
+    
+    // Mobile detection and fallback logic (existing code)
+    if (isMobile) {
+        console.log('Mobile device detected, adding additional event handlers');
+        
+        // Add a fallback submission method for mobile
+        let submissionAttempts = 0;
+        const maxAttempts = 3;
+        
+        window.mobileSubmitFallback = function() {
+            submissionAttempts++;
+            console.log('Mobile fallback submission attempt:', submissionAttempts);
+            
+            if (submissionAttempts > maxAttempts) {
+                alert('Having trouble submitting? Please ensure you have items selected and try refreshing the page.');
+                return;
+            }
+            
+            // Force update all input values
+            const enabledQuantityInputs = form.querySelectorAll('.quantity-input:not([disabled])');
+            enabledQuantityInputs.forEach(input => {
+                input.setAttribute('value', input.value);
+            });
+            
+            // Show fallback button if main submission fails
+            setTimeout(() => {
+                const fallbackBtn = document.getElementById('fallbackSubmitBtn');
+                if (fallbackBtn) {
+                    fallbackBtn.classList.remove('d-none');
+                    fallbackBtn.onclick = function() {
+                        // Simple form submission without JavaScript interference
+                        const form = document.getElementById('round1Form');
+                        form.onsubmit = null; // Remove all JS handlers
+                        form.submit();
+                        return false;
+                    };
+                }
+            }, 3000);
+        };
+        
+        // Call fallback if regular submission doesn't work
+        setTimeout(window.mobileSubmitFallback, 5000);
+    }
 });
 
-// Mobile-friendly form validation
+// Mobile-specific form submission function
+function mobileSubmitForm() {
+    const form = document.getElementById('round1Form');
+    const quantityInputs = document.querySelectorAll('.quantity-input:not([disabled])'); // Only enabled inputs
+    const submitBtn = document.getElementById('submitBtn');
+    
+    console.log('Mobile submit function called');
+    console.log('Found', quantityInputs.length, 'enabled quantity inputs');
+    
+    // Force update all values and check selection
+    let hasSelection = false;
+    let totalPrice = 0;
+    let debugInfo = [];
+    
+    quantityInputs.forEach(input => {
+        // Get the current value from the input
+        const value = input.value || '0';
+        const quantity = parseInt(value) || 0;
+        const price = parseFloat(input.dataset.price) || 0;
+        
+        debugInfo.push(`${input.name}: ${value} (qty: ${quantity})`);
+        
+        if (quantity > 0) {
+            hasSelection = true;
+            totalPrice += (quantity * price);
+        }
+        
+        // Ensure the value is properly set in the form
+        input.setAttribute('value', value);
+    });
+    
+    console.log('Selection check:', debugInfo);
+    console.log('Has selection:', hasSelection, 'Total price:', totalPrice);
+    
+    if (!hasSelection) {
+        alert('Please select at least one item. Debug info: ' + debugInfo.slice(0, 5).join(', ') + (debugInfo.length > 5 ? '...' : ''));
+        return false;
+    }
+    
+    if (totalPrice > {{ budget }}) {
+        alert('Total price exceeds budget. Please reduce your selection.');
+        return false;
+    }
+    
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+    
+    // Submit the form
+    console.log('Submitting form...');
+    form.submit();
+    
+    return true;
+}
+
+// Mobile-friendly form validation (kept for compatibility)
 function validateRound1Form() {
     const quantityInputs = document.querySelectorAll('.quantity-input');
     let hasSelection = false;
@@ -307,7 +449,19 @@ function validateRound1Form() {
         return false;
     }
     
-    return true;
+    // For mobile compatibility, add a small delay before submission
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        
+        // Use setTimeout to ensure all input values are captured
+        setTimeout(() => {
+            document.getElementById('round1Form').submit();
+        }, 300);
+    }
+    
+    return false; // Prevent immediate submission, we'll handle it in setTimeout
 }
 </script>
 {% endblock %}

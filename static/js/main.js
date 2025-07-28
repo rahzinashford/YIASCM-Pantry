@@ -176,61 +176,144 @@ document.addEventListener('DOMContentLoaded', function () {
     forms.forEach(function (form) {
         let submitted = false;
         let submitButton = form.querySelector('button[type="submit"]');
+        const isRoundForm = form.id === 'round1Form' || form.id === 'round2Form';
 
-        form.addEventListener('submit', function (e) {
-            const isRoundForm = form.id === 'round1Form' || form.id === 'round2Form';
-
-            if (submitted) {
-                e.preventDefault();
-                return false;
-            }
-
-            if (isRoundForm) {
-                e.preventDefault(); // Delay submit slightly to allow mobile input events to finish
-
-                setTimeout(() => {
-                    const quantityInputs = form.querySelectorAll('.quantity-input');
-                    let hasSelection = false;
-
-                    quantityInputs.forEach(input => {
-                        const value = input.value.trim();
-			if (value !== '' && !isNaN(value) && parseInt(value, 10) > 0) {
-			    hasSelection = true;
-			}
-
-                    });
-
-                    if (!hasSelection) {
-                        alert('Please select at least one item.');
+        // For round forms, use simpler mobile-friendly submission
+        if (isRoundForm) {
+            // Skip complex event handling for mobile if using onclick handlers
+            const submitButton = form.querySelector('button[type="submit"]:not([type="button"])');
+            
+            // Only add complex handling if there's no onclick handler (fallback)
+            if (!submitButton || !submitButton.onclick) {
+                form.addEventListener('submit', function (e) {
+                    if (submitted) {
+                        e.preventDefault();
                         return false;
                     }
 
-                    // Mark as submitted
-                    submitted = true;
-
-                    // Disable button
-                    if (submitButton) {
-                        submitButton.disabled = true;
-                        const originalText = submitButton.innerHTML;
-                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-
-                        // Reset failsafe
+                    // Check if mobile device
+                    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+                    
+                    if (isMobile) {
+                        // For mobile, use simple validation and submit
+                        e.preventDefault();
+                        
+                        // Add a delay to ensure all mobile input events have processed
                         setTimeout(() => {
-                            submitted = false;
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = originalText;
-                        }, 10000);
-                    }
+                            const quantityInputs = form.querySelectorAll('.quantity-input');
+                            let hasSelection = false;
+                            let totalQuantity = 0;
 
-                    if (typeof form.requestSubmit === 'function') {
-    			form.requestSubmit();
-		    } else {
-    			form.submit(); // fallback for older browsers
-		    }
- 		// Actually submit the form now
-                }, 100); // Slight delay to ensure value is read properly
+                            console.log('Mobile validation check - total inputs found:', quantityInputs.length);
+
+                            quantityInputs.forEach((input, index) => {
+                                // Force refresh the value from the DOM
+                                const currentValue = input.value;
+                                const numericValue = parseInt(currentValue) || 0;
+                                
+                                console.log(`Input ${index}: ${input.name} = "${currentValue}" (parsed: ${numericValue})`);
+                                
+                                if (numericValue > 0) {
+                                    hasSelection = true;
+                                    totalQuantity += numericValue;
+                                }
+                                
+                                // Ensure value attribute is set for mobile
+                                input.setAttribute('value', currentValue);
+                            });
+
+                            console.log('Mobile validation result:', { hasSelection, totalQuantity });
+
+                            if (!hasSelection) {
+                                alert('Please select at least one item. Current total quantity: ' + totalQuantity);
+                                return false;
+                            }
+
+                            submitted = true;
+                            if (submitButton) {
+                                submitButton.disabled = true;
+                                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+                            }
+
+                            // Simple form submission for mobile
+                            console.log('Submitting form for mobile device');
+                            form.submit();
+                        }, 300); // Increased delay to ensure mobile inputs are processed
+                        
+                    } else {
+                        // Desktop logic with more sophisticated handling
+                        e.preventDefault();
+
+                        setTimeout(() => {
+                            const quantityInputs = form.querySelectorAll('.quantity-input');
+                            let hasSelection = false;
+
+                            quantityInputs.forEach(input => {
+                                const value = input.value.trim();
+                                if (value !== '' && !isNaN(value) && parseInt(value, 10) > 0) {
+                                    hasSelection = true;
+                                }
+                            });
+
+                            if (!hasSelection) {
+                                alert('Please select at least one item.');
+                                return false;
+                            }
+
+                            submitted = true;
+                            if (submitButton) {
+                                submitButton.disabled = true;
+                                const originalText = submitButton.innerHTML;
+                                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+                                setTimeout(() => {
+                                    submitted = false;
+                                    submitButton.disabled = false;
+                                    submitButton.innerHTML = originalText;
+                                }, 15000);
+                            }
+
+                            // Try fetch for desktop, fallback to form.submit()
+                            const formData = new FormData(form);
+                            
+                            if (window.fetch) {
+                                fetch(form.action || window.location.pathname, {
+                                    method: 'POST',
+                                    body: formData,
+                                    credentials: 'same-origin'
+                                }).then(response => {
+                                    if (response.redirected) {
+                                        window.location.href = response.url;
+                                    } else if (response.ok) {
+                                        return response.text().then(html => {
+                                            document.open();
+                                            document.write(html);
+                                            document.close();
+                                        });
+                                    } else {
+                                        throw new Error('Network response was not ok');
+                                    }
+                                }).catch(error => {
+                                    console.error('Fetch submission error:', error);
+                                    form.submit();
+                                });
+                            } else {
+                                form.submit();
+                            }
+                        }, 200);
+                    }
+                });
             }
-        });
+        } else {
+            // Non-round forms use standard validation
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        }
     });
 });
 
@@ -239,15 +322,33 @@ window.increaseQuantity = function (productId) {
     const input = document.getElementById('quantity_' + productId);
     if (input) {
         const currentValue = parseInt(input.value) || 0;
-        input.value = currentValue + 1;
-        input.setAttribute('value', input.value); // Sync actual DOM attribute
-        // Trigger input event to update totals
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+        const newValue = currentValue + 1;
+        
+        // Update the input value
+        input.value = newValue;
+        input.setAttribute('value', newValue);
+        
+        console.log(`Increased quantity for product ${productId}: ${currentValue} -> ${newValue}`);
+        
+        // Ensure the input is properly focused and updated
+        input.focus();
+        
+        // Trigger multiple events to ensure all handlers are called
+        const events = ['input', 'change', 'keyup', 'blur'];
+        events.forEach(eventType => {
+            const event = new Event(eventType, { 
+                bubbles: true, 
+                cancelable: true 
+            });
+            input.dispatchEvent(event);
+        });
 
         // Force update of totals if function exists
-        if (window.updateTotals && typeof window.updateTotals === 'function') {
-            window.updateTotals();
-        }
+        setTimeout(() => {
+            if (window.updateTotals && typeof window.updateTotals === 'function') {
+                window.updateTotals();
+            }
+        }, 100);
     }
 };
 
@@ -256,15 +357,33 @@ window.decreaseQuantity = function (productId) {
     if (input) {
         const currentValue = parseInt(input.value) || 0;
         if (currentValue > 0) {
-            input.value = currentValue - 1;
-            input.setAttribute('value', input.value); // Sync actual DOM attribute
-            // Trigger input event to update totals
-            input.dispatchEvent(new Event('input', { bubbles: true }));
+            const newValue = currentValue - 1;
+            
+            // Update the input value
+            input.value = newValue;
+            input.setAttribute('value', newValue);
+            
+            console.log(`Decreased quantity for product ${productId}: ${currentValue} -> ${newValue}`);
+            
+            // Ensure the input is properly focused and updated
+            input.focus();
+            
+            // Trigger multiple events to ensure all handlers are called
+            const events = ['input', 'change', 'keyup', 'blur'];
+            events.forEach(eventType => {
+                const event = new Event(eventType, { 
+                    bubbles: true, 
+                    cancelable: true 
+                });
+                input.dispatchEvent(event);
+            });
 
             // Force update of totals if function exists
-            if (window.updateTotals && typeof window.updateTotals === 'function') {
-                window.updateTotals();
-            }
+            setTimeout(() => {
+                if (window.updateTotals && typeof window.updateTotals === 'function') {
+                    window.updateTotals();
+                }
+            }, 100);
         }
     }
 };
@@ -303,6 +422,52 @@ window.formatDate = function (dateString) {
         hour: '2-digit',
         minute: '2-digit'
     });
+};
+
+// Debug function for mobile form issues
+window.debugMobileForm = function() {
+    const form = document.getElementById('round1Form') || document.getElementById('round2Form');
+    if (!form) {
+        console.log('No round form found');
+        return;
+    }
+    
+    console.log('=== Mobile Form Debug ===');
+    console.log('User Agent:', navigator.userAgent);
+    console.log('Form ID:', form.id);
+    
+    const allQuantityInputs = form.querySelectorAll('.quantity-input');
+    const enabledQuantityInputs = form.querySelectorAll('.quantity-input:not([disabled])');
+    console.log('Total quantity inputs found:', allQuantityInputs.length);
+    console.log('Enabled quantity inputs found:', enabledQuantityInputs.length);
+    
+    let hasAnyValue = false;
+    enabledQuantityInputs.forEach((input, index) => {
+        const value = input.value;
+        const name = input.name;
+        const parsed = parseInt(value) || 0;
+        const classes = input.className;
+        
+        if (parsed > 0) hasAnyValue = true;
+        
+        console.log(`Enabled Input ${index}: name="${name}", value="${value}", parsed=${parsed}, classes="${classes}"`);
+    });
+    
+    console.log('Has any values > 0 in enabled inputs:', hasAnyValue);
+    
+    // Test FormData from enabled inputs only
+    const formData = new FormData(form);
+    console.log('FormData entries:');
+    let formDataHasValues = false;
+    for (let [key, value] of formData.entries()) {
+        if (key.startsWith('quantity_')) {
+            console.log(`  ${key}: ${value}`);
+            if (parseInt(value) > 0) formDataHasValues = true;
+        }
+    }
+    
+    console.log('FormData has values > 0:', formDataHasValues);
+    console.log('=== End Debug ===');
 };
 
 

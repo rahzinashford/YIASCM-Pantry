@@ -60,7 +60,7 @@
                                                             <br><small class="text-muted">₹{{ "%.3f"|format(product.unit_price) }} per {{ product.unit_type[:-1] }}</small>
                                                         </td>
                                                         <td>
-                                                            <input type="number" class="form-control quantity-input" 
+                                                            <input type="number" class="form-control quantity-input desktop-quantity-input" 
                                                                    name="quantity_{{ product.id }}" 
                                                                    min="0" value="0" 
                                                                    data-price="{{ product.price }}"
@@ -158,8 +158,12 @@
                                     </table>
                                     
                                     <div class="d-grid">
-                                        <button type="submit" class="btn btn-primary" id="submitBtn" onclick="return validateRound2Form()">
+                                        <button type="button" class="btn btn-primary" id="submitBtn" onclick="mobileSubmitFormRound2()">
                                             <i class="fas fa-check me-2"></i>Complete Round 2
+                                        </button>
+                                        <!-- Hidden actual submit button -->
+                                        <button type="submit" class="btn btn-primary d-none" id="hiddenSubmitBtn">
+                                            Submit
                                         </button>
                                     </div>
                                 </div>
@@ -256,9 +260,80 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     updateTotals();
+    
+    // Mobile detection and input management for Round 2
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    if (isMobile) {
+        console.log('Mobile device detected in Round 2, disabling desktop inputs');
+        
+        // Disable desktop inputs on mobile to prevent duplicate form submission
+        const desktopInputs = document.querySelectorAll('.desktop-quantity-input');
+        desktopInputs.forEach(input => {
+            input.disabled = true;
+            input.removeAttribute('name'); // Remove name so it's not submitted
+        });
+        
+        console.log('Disabled', desktopInputs.length, 'desktop inputs in Round 2');
+    } else {
+        // On desktop, disable mobile inputs
+        const mobileInputs = document.querySelectorAll('.mobile-quantity-input');
+        mobileInputs.forEach(input => {
+            input.disabled = true;
+            input.removeAttribute('name'); // Remove name so it's not submitted
+        });
+        
+        console.log('Disabled', mobileInputs.length, 'mobile inputs in Round 2');
+    }
 });
 
-// Mobile-friendly form validation
+// Mobile-specific form submission function for Round 2
+function mobileSubmitFormRound2() {
+    const form = document.getElementById('round2Form');
+    const quantityInputs = document.querySelectorAll('.quantity-input:not([disabled])'); // Only enabled inputs
+    const submitBtn = document.getElementById('submitBtn');
+    
+    console.log('Mobile submit function called for Round 2');
+    console.log('Found', quantityInputs.length, 'enabled quantity inputs');
+    
+    // Force update all values and check selection
+    let hasSelection = false;
+    let debugInfo = [];
+    
+    quantityInputs.forEach(input => {
+        // Get the current value from the input
+        const value = input.value || '0';
+        const quantity = parseInt(value) || 0;
+        
+        debugInfo.push(`${input.name}: ${value} (qty: ${quantity})`);
+        
+        if (quantity > 0) {
+            hasSelection = true;
+        }
+        
+        // Ensure the value is properly set in the form
+        input.setAttribute('value', value);
+    });
+    
+    console.log('Round 2 Selection check:', debugInfo.slice(0, 5).join(', ') + (debugInfo.length > 5 ? '...' : ''));
+    console.log('Has selection:', hasSelection);
+    
+    if (!hasSelection) {
+        alert('Please select at least one item. Debug info: ' + debugInfo.slice(0, 5).join(', ') + (debugInfo.length > 5 ? '...' : ''));
+        return false;
+    }
+    
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+    
+    // Submit the form
+    console.log('Submitting Round 2 form...');
+    form.submit();
+    
+    return true;
+}
+
+// Mobile-friendly form validation (kept for compatibility)
 function validateRound2Form() {
     const quantityInputs = document.querySelectorAll('.quantity-input');
     let hasSelection = false;
